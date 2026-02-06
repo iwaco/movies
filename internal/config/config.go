@@ -1,6 +1,10 @@
 package config
 
-import "os"
+import (
+	"os"
+
+	"github.com/joho/godotenv"
+)
 
 type Config struct {
 	DBPath    string
@@ -9,6 +13,7 @@ type Config struct {
 }
 
 func Load() *Config {
+	_ = godotenv.Load()
 	return &Config{
 		DBPath:    getEnv("MOVIES_DB_PATH", "movies.db"),
 		MediaRoot: getEnv("MOVIES_MEDIA_ROOT", "./media"),

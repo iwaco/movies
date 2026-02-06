@@ -26,7 +26,7 @@ export function ImageGallery({ videoId }: ImageGalleryProps) {
             key={pic}
             src={`/media${pic}`}
             alt={`Picture ${index + 1}`}
-            className="w-full aspect-video object-cover cursor-pointer rounded"
+            className="w-full aspect-video object-cover cursor-pointer rounded-lg hover:opacity-90 transition-opacity duration-200"
             onClick={() => setLightboxIndex(index)}
           />
         ))}

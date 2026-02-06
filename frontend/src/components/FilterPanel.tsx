@@ -37,15 +37,17 @@ export function FilterPanel() {
     setSearchParams(params)
   }
 
+  const selectClassName = "px-3 py-1.5 rounded-lg bg-white/60 dark:bg-white/10 backdrop-blur-md border border-white/30 dark:border-white/15 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-rose-500/50 transition-all duration-200 cursor-pointer ml-2"
+
   return (
     <div className="flex gap-4">
       <div>
-        <label htmlFor="tag-filter">タグ</label>
+        <label htmlFor="tag-filter" className="text-gray-700 dark:text-gray-300">タグ</label>
         <select
           id="tag-filter"
           value={searchParams.get('tag') || ''}
           onChange={(e) => handleTagChange(e.target.value)}
-          className="border rounded px-2 py-1 ml-2"
+          className={selectClassName}
         >
           <option value="">すべて</option>
           {tags?.map((tag) => (
@@ -56,12 +58,12 @@ export function FilterPanel() {
         </select>
       </div>
       <div>
-        <label htmlFor="actor-filter">出演者</label>
+        <label htmlFor="actor-filter" className="text-gray-700 dark:text-gray-300">出演者</label>
         <select
           id="actor-filter"
           value={searchParams.get('actor') || ''}
           onChange={(e) => handleActorChange(e.target.value)}
-          className="border rounded px-2 py-1 ml-2"
+          className={selectClassName}
         >
           <option value="">すべて</option>
           {actors?.map((actor) => (

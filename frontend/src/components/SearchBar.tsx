@@ -29,7 +29,7 @@ export function SearchBar() {
       value={value}
       onChange={(e) => setValue(e.target.value)}
       placeholder="検索..."
-      className="border rounded px-3 py-2 w-full"
+      className="w-full px-4 py-2.5 rounded-xl bg-white/60 dark:bg-white/10 backdrop-blur-md border border-white/30 dark:border-white/15 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-rose-500/50 transition-all duration-200"
     />
   )
 }

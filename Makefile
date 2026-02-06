@@ -1,10 +1,13 @@
-.PHONY: dev build test test-backend test-frontend clean
+.PHONY: dev build build-converter test test-backend test-frontend clean
 
 dev:
 	go run ./cmd/server
 
 build: build-frontend
 	go build -o bin/server ./cmd/server
+
+build-converter:
+	go build -o bin/converter ./cmd/converter
 
 build-frontend:
 	cd frontend && npm run build

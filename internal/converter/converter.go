@@ -68,7 +68,7 @@ func ParseJS(input []byte) ([]byte, error) {
 }
 
 // Convert transforms parsed JSON data into MovieOutput structs with resolved paths.
-func Convert(jsonData []byte, baseDir string) ([]MovieOutput, error) {
+func Convert(jsonData []byte) ([]MovieOutput, error) {
 	var jsMovies []movieJS
 	if err := json.Unmarshal(jsonData, &jsMovies); err != nil {
 		return nil, fmt.Errorf("unmarshal: %w", err)
@@ -79,15 +79,15 @@ func Convert(jsonData []byte, baseDir string) ([]MovieOutput, error) {
 		dir := m.Dir
 
 		// Resolve jpg path
-		jpg := filepath.Join(baseDir, dir, m.JPG)
+		jpg := "/" + filepath.Join(dir, m.JPG)
 
 		// Resolve pictures_dir, preserving trailing slash
-		picturesDir := filepath.Join(baseDir, dir, m.Detail) + "/"
+		picturesDir := "/" + filepath.Join(dir, m.Detail) + "/"
 
 		// Resolve format paths
 		formats := make(map[string]string, len(m.Formats))
 		for k, v := range m.Formats {
-			formats[k] = filepath.Join(baseDir, dir, v)
+			formats[k] = "/" + filepath.Join(dir, v)
 		}
 
 		movies = append(movies, MovieOutput{
@@ -107,13 +107,13 @@ func Convert(jsonData []byte, baseDir string) ([]MovieOutput, error) {
 }
 
 // ConvertFile reads a JS file and returns formatted JSON output.
-func ConvertFile(input []byte, baseDir string) ([]byte, error) {
+func ConvertFile(input []byte) ([]byte, error) {
 	jsonData, err := ParseJS(input)
 	if err != nil {
 		return nil, fmt.Errorf("parse JS: %w", err)
 	}
 
-	movies, err := Convert(jsonData, baseDir)
+	movies, err := Convert(jsonData)
 	if err != nil {
 		return nil, fmt.Errorf("convert: %w", err)
 	}

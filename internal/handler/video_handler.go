@@ -14,11 +14,12 @@ import (
 )
 
 type VideoHandler struct {
-	repo *repository.VideoRepository
+	repo      *repository.VideoRepository
+	mediaRoot string
 }
 
-func NewVideoHandler(repo *repository.VideoRepository) *VideoHandler {
-	return &VideoHandler{repo: repo}
+func NewVideoHandler(repo *repository.VideoRepository, mediaRoot string) *VideoHandler {
+	return &VideoHandler{repo: repo, mediaRoot: mediaRoot}
 }
 
 func (h *VideoHandler) List(w http.ResponseWriter, r *http.Request) {
@@ -76,7 +77,7 @@ func (h *VideoHandler) GetPictures(w http.ResponseWriter, r *http.Request) {
 
 	var pictures []string
 	dir := video.PicturesDir
-	entries, err := os.ReadDir(dir)
+	entries, err := os.ReadDir(filepath.Join(h.mediaRoot, dir))
 	if err == nil {
 		imageExts := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".webp": true}
 		for _, entry := range entries {

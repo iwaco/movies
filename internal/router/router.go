@@ -18,7 +18,7 @@ func New(db *sql.DB, cfg *config.Config) *chi.Mux {
 	favRepo := repository.NewFavoriteRepository(db)
 	imp := importer.New(db)
 
-	vh := handler.NewVideoHandler(videoRepo)
+	vh := handler.NewVideoHandler(videoRepo, cfg.MediaRoot)
 	fh := handler.NewFavoriteHandler(favRepo)
 	ih := handler.NewImportHandler(imp)
 

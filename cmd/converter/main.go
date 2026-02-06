@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/iwaco/movies/internal/converter"
 )
@@ -20,15 +19,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	baseDir := filepath.Dir(*inputFile)
-
 	input, err := os.ReadFile(*inputFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error reading input file: %v\n", err)
 		os.Exit(1)
 	}
 
-	result, err := converter.ConvertFile(input, baseDir)
+	result, err := converter.ConvertFile(input)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error converting: %v\n", err)
 		os.Exit(1)

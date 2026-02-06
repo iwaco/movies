@@ -3,7 +3,7 @@ package converter
 import (
 	"encoding/json"
 	"fmt"
-	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -79,15 +79,15 @@ func Convert(jsonData []byte, baseDir string) ([]MovieOutput, error) {
 		dir := m.Dir
 
 		// Resolve jpg path
-		jpg := path.Join(baseDir, dir, m.JPG)
+		jpg := filepath.Join(baseDir, dir, m.JPG)
 
 		// Resolve pictures_dir, preserving trailing slash
-		picturesDir := path.Join(baseDir, dir, m.Detail) + "/"
+		picturesDir := filepath.Join(baseDir, dir, m.Detail) + "/"
 
 		// Resolve format paths
 		formats := make(map[string]string, len(m.Formats))
 		for k, v := range m.Formats {
-			formats[k] = path.Join(baseDir, dir, v)
+			formats[k] = filepath.Join(baseDir, dir, v)
 		}
 
 		movies = append(movies, MovieOutput{

@@ -85,7 +85,7 @@ func TestConvert(t *testing.T) {
 		t.Fatalf("ParseJS() error = %v", err)
 	}
 
-	movies, err := Convert(jsonData, "/base")
+	movies, err := Convert(jsonData)
 	if err != nil {
 		t.Fatalf("Convert() error = %v", err)
 	}
@@ -108,16 +108,16 @@ func TestConvert(t *testing.T) {
 	if m.Date != "2024-01-15" {
 		t.Errorf("Date = %q, want %q", m.Date, "2024-01-15")
 	}
-	if m.JPG != "/base/some/dir/thumb.jpg" {
-		t.Errorf("JPG = %q, want %q", m.JPG, "/base/some/dir/thumb.jpg")
+	if m.JPG != "/some/dir/thumb.jpg" {
+		t.Errorf("JPG = %q, want %q", m.JPG, "/some/dir/thumb.jpg")
 	}
-	if m.PicturesDir != "/base/some/dir/pics/" {
-		t.Errorf("PicturesDir = %q, want %q", m.PicturesDir, "/base/some/dir/pics/")
+	if m.PicturesDir != "/some/dir/pics/" {
+		t.Errorf("PicturesDir = %q, want %q", m.PicturesDir, "/some/dir/pics/")
 	}
 
 	wantFormats := map[string]string{
-		"720p":  "/base/some/dir/video_720p.mp4",
-		"1080p": "/base/some/dir/video_1080p.mp4",
+		"720p":  "/some/dir/video_720p.mp4",
+		"1080p": "/some/dir/video_1080p.mp4",
 	}
 	for k, want := range wantFormats {
 		if got, ok := m.Formats[k]; !ok || got != want {
@@ -134,11 +134,11 @@ func TestConvert(t *testing.T) {
 
 	// Check second movie
 	m2 := movies[1]
-	if m2.JPG != "/base/other/path/cover.jpg" {
-		t.Errorf("second JPG = %q, want %q", m2.JPG, "/base/other/path/cover.jpg")
+	if m2.JPG != "/other/path/cover.jpg" {
+		t.Errorf("second JPG = %q, want %q", m2.JPG, "/other/path/cover.jpg")
 	}
-	if m2.PicturesDir != "/base/other/path/images/" {
-		t.Errorf("second PicturesDir = %q, want %q", m2.PicturesDir, "/base/other/path/images/")
+	if m2.PicturesDir != "/other/path/images/" {
+		t.Errorf("second PicturesDir = %q, want %q", m2.PicturesDir, "/other/path/images/")
 	}
 }
 
@@ -153,7 +153,7 @@ func TestConvert_ExcludesDirAndDetail(t *testing.T) {
 		t.Fatalf("ParseJS() error = %v", err)
 	}
 
-	movies, err := Convert(jsonData, "/base")
+	movies, err := Convert(jsonData)
 	if err != nil {
 		t.Fatalf("Convert() error = %v", err)
 	}
@@ -181,7 +181,7 @@ func TestConvertFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, err := ConvertFile(input, "/base")
+	got, err := ConvertFile(input)
 	if err != nil {
 		t.Fatalf("ConvertFile() error = %v", err)
 	}
@@ -197,8 +197,8 @@ func TestConvertFile(t *testing.T) {
 	}
 
 	// Verify path resolution
-	if movies[0].JPG != "/base/some/dir/thumb.jpg" {
-		t.Errorf("JPG = %q, want %q", movies[0].JPG, "/base/some/dir/thumb.jpg")
+	if movies[0].JPG != "/some/dir/thumb.jpg" {
+		t.Errorf("JPG = %q, want %q", movies[0].JPG, "/some/dir/thumb.jpg")
 	}
 }
 
@@ -208,7 +208,7 @@ func TestConvertFile_Empty(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, err := ConvertFile(input, "/base")
+	got, err := ConvertFile(input)
 	if err != nil {
 		t.Fatalf("ConvertFile() error = %v", err)
 	}
@@ -229,7 +229,7 @@ func TestConvertFile_UnquotedKeys(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, err := ConvertFile(input, "/media")
+	got, err := ConvertFile(input)
 	if err != nil {
 		t.Fatalf("ConvertFile() error = %v", err)
 	}
@@ -247,10 +247,10 @@ func TestConvertFile_UnquotedKeys(t *testing.T) {
 	if m.ID != "xyz789" {
 		t.Errorf("ID = %q, want %q", m.ID, "xyz789")
 	}
-	if m.JPG != "/media/unquoted/dir/photo.jpg" {
-		t.Errorf("JPG = %q, want %q", m.JPG, "/media/unquoted/dir/photo.jpg")
+	if m.JPG != "/unquoted/dir/photo.jpg" {
+		t.Errorf("JPG = %q, want %q", m.JPG, "/unquoted/dir/photo.jpg")
 	}
-	if m.PicturesDir != "/media/unquoted/dir/gallery/" {
-		t.Errorf("PicturesDir = %q, want %q", m.PicturesDir, "/media/unquoted/dir/gallery/")
+	if m.PicturesDir != "/unquoted/dir/gallery/" {
+		t.Errorf("PicturesDir = %q, want %q", m.PicturesDir, "/unquoted/dir/gallery/")
 	}
 }

@@ -24,7 +24,7 @@ func setupTestRouter(t *testing.T) (*chi.Mux, *database.DB) {
 	favRepo := repository.NewFavoriteRepository(db)
 	imp := importer.New(db)
 
-	vh := NewVideoHandler(videoRepo)
+	vh := NewVideoHandler(videoRepo, "/test-media")
 	fh := NewFavoriteHandler(favRepo)
 	ih := NewImportHandler(imp)
 

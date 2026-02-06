@@ -1,1 +1,13 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", sans-serif;
+  --color-glass-light: rgba(255, 255, 255, 0.7);
+  --color-glass-dark: rgba(15, 15, 35, 0.7);
+  --color-glass-border-light: rgba(255, 255, 255, 0.3);
+  --color-glass-border-dark: rgba(255, 255, 255, 0.1);
+  --color-surface-light: #ffffff;
+  --color-surface-dark: #0F0F23;
+  --color-accent: #E11D48;
+}

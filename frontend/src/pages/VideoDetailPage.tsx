@@ -23,41 +23,41 @@ export function VideoDetailPage() {
       </div>
       <div className="mb-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">{video.title}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{video.title}</h1>
           <FavoriteButton videoId={video.id} isFavorite={video.is_favorite} />
         </div>
-        <p className="text-gray-600 mt-1">{video.date}</p>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">{video.date}</p>
         <a
           href={video.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-600 hover:underline"
+          className="text-rose-500 dark:text-rose-400 hover:underline"
         >
           外部リンク
         </a>
       </div>
       <div className="mb-4">
-        <h2 className="text-lg font-semibold mb-1">出演者</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">出演者</h2>
         <div className="flex flex-wrap gap-2">
           {video.actors.map((actor) => (
-            <span key={actor.id} className="bg-gray-100 rounded px-2 py-1">
+            <span key={actor.id} className="bg-white/50 dark:bg-white/10 backdrop-blur-sm rounded-lg px-3 py-1 text-gray-800 dark:text-gray-200">
               {actor.name}
             </span>
           ))}
         </div>
       </div>
       <div className="mb-4">
-        <h2 className="text-lg font-semibold mb-1">タグ</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">タグ</h2>
         <div className="flex flex-wrap gap-2">
           {video.tags.map((tag) => (
-            <span key={tag.id} className="bg-gray-200 rounded px-2 py-1 text-sm">
+            <span key={tag.id} className="bg-white/50 dark:bg-white/10 backdrop-blur-sm rounded-lg px-3 py-1 text-sm text-gray-700 dark:text-gray-300">
               {tag.name}
             </span>
           ))}
         </div>
       </div>
       <div>
-        <h2 className="text-lg font-semibold mb-2">画像</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">画像</h2>
         <ImageGallery videoId={video.id} />
       </div>
     </div>

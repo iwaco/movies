@@ -44,7 +44,7 @@ export function FavoriteButton({ videoId, isFavorite: initialFavorite }: Favorit
         fill={isFavorite ? 'red' : 'none'}
         stroke={isFavorite ? 'red' : 'currentColor'}
         strokeWidth={2}
-        className="w-6 h-6"
+        className="w-6 h-6 dark:text-gray-300"
       >
         <path
           strokeLinecap="round"

@@ -1,0 +1,31 @@
+[
+  {
+    "id": "abc123",
+    "title": "サンプル動画",
+    "url": "https://example.com/video/abc123",
+    "date": "2024-06-15",
+    "actors": ["Actor A", "Actor B"],
+    "tags": ["tag1", "tag2"],
+    "jpg": "/path/to/thumbnail.jpg",
+    "pictures_dir": "/path/to/pictures/abc123/",
+    "formats": {
+      "240p": "/path/to/240p.mp4",
+      "720p": "/path/to/720p.mp4",
+      "1080p": "/path/to/1080p.mp4"
+    }
+  },
+  {
+    "id": "def456",
+    "title": "テスト動画2",
+    "url": "https://example.com/video/def456",
+    "date": "2024-07-20",
+    "actors": ["Actor B", "Actor C"],
+    "tags": ["tag2", "tag3"],
+    "jpg": "/path/to/thumbnail2.jpg",
+    "pictures_dir": "/path/to/pictures/def456/",
+    "formats": {
+      "480p": "/path/to/480p.mp4",
+      "1080p": "/path/to/1080p_2.mp4"
+    }
+  }
+]

@@ -56,10 +56,7 @@ export function VideoDetailPage() {
           ))}
         </div>
       </div>
-      <div>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">画像</h2>
-        <ImageGallery videoId={video.id} />
-      </div>
+      <ImageGallery videoId={video.id} />
     </div>
   )
 }

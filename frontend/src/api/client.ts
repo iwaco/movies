@@ -34,7 +34,7 @@ export async function fetchVideoPictures(id: string): Promise<string[]> {
   const res = await fetch(`/api/v1/videos/${id}/pictures`)
   if (!res.ok) throw new Error('Failed to fetch pictures')
   const data = await res.json()
-  return data.pictures
+  return data.pictures ?? []
 }
 
 export async function fetchFavorites(): Promise<PaginatedResponse<Video>> {

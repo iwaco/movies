@@ -35,4 +35,13 @@ describe('VideoListPage', () => {
       expect(screen.getByText('1 / 1')).toBeInTheDocument()
     })
   })
+
+  it('filters out videos without formats by default', async () => {
+    renderWithProviders(<VideoListPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Test Video 1')).toBeInTheDocument()
+      expect(screen.getByText('Test Video 2')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Test Video 3 No Format')).not.toBeInTheDocument()
+  })
 })

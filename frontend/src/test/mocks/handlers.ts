@@ -35,6 +35,20 @@ export const mockVideos: Video[] = [
     created_at: '2024-02-20T00:00:00Z',
     updated_at: '2024-02-20T00:00:00Z',
   },
+  {
+    id: 'video-3',
+    title: 'Test Video 3 No Format',
+    url: 'https://example.com/video3',
+    date: '2024-03-10',
+    jpg: '/videos/video3/thumb.jpg',
+    pictures_dir: '/videos/video3/pictures',
+    actors: [{ id: 1, name: 'Actor A' }],
+    tags: [{ id: 3, name: 'Tag3' }],
+    formats: [],
+    is_favorite: false,
+    created_at: '2024-03-10T00:00:00Z',
+    updated_at: '2024-03-10T00:00:00Z',
+  },
 ]
 
 export const mockTags: Tag[] = [
@@ -57,8 +71,12 @@ export const handlers = [
     const q = url.searchParams.get('q') || ''
     const tag = url.searchParams.get('tag') || ''
     const actor = url.searchParams.get('actor') || ''
+    const hasVideo = url.searchParams.get('has_video')
 
     let filtered = [...mockVideos]
+    if (hasVideo === 'true') {
+      filtered = filtered.filter((v) => v.formats.length > 0)
+    }
     if (q) {
       filtered = filtered.filter((v) =>
         v.title.toLowerCase().includes(q.toLowerCase())

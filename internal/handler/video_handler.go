@@ -36,6 +36,19 @@ func (h *VideoHandler) List(w http.ResponseWriter, r *http.Request) {
 		sort = "date_desc"
 	}
 
+	var hasVideo bool
+	if raw := r.URL.Query().Get("has_video"); raw != "" {
+		switch raw {
+		case "true":
+			hasVideo = true
+		case "false":
+			hasVideo = false
+		default:
+			http.Error(w, "invalid has_video parameter", http.StatusBadRequest)
+			return
+		}
+	}
+
 	params := model.VideoQueryParams{
 		Page:     page,
 		PerPage:  perPage,
@@ -46,6 +59,7 @@ func (h *VideoHandler) List(w http.ResponseWriter, r *http.Request) {
 		DateTo:   r.URL.Query().Get("date_to"),
 		Sort:     sort,
 		Favorite: r.URL.Query().Get("favorite") == "true",
+		HasVideo: hasVideo,
 	}
 
 	result, err := h.repo.List(params)

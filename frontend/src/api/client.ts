@@ -6,6 +6,7 @@ export interface FetchVideosParams {
   q?: string;
   tag?: string;
   actor?: string;
+  has_video?: boolean;
 }
 
 export async function fetchVideos(params: FetchVideosParams = {}): Promise<PaginatedResponse<Video>> {
@@ -15,6 +16,8 @@ export async function fetchVideos(params: FetchVideosParams = {}): Promise<Pagin
   if (params.q) searchParams.set('q', params.q)
   if (params.tag) searchParams.set('tag', params.tag)
   if (params.actor) searchParams.set('actor', params.actor)
+  if (params.has_video === true) searchParams.set('has_video', 'true')
+  if (params.has_video === false) searchParams.set('has_video', 'false')
 
   const res = await fetch(`/api/v1/videos?${searchParams.toString()}`)
   if (!res.ok) throw new Error('Failed to fetch videos')

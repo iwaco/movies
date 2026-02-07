@@ -3,6 +3,8 @@ package router
 import (
 	"database/sql"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -51,11 +53,20 @@ func New(db *sql.DB, cfg *config.Config) *chi.Mux {
 }
 
 func WithSPAFallback(r *chi.Mux, indexPath string) http.Handler {
+	distDir := filepath.Dir(indexPath)
+	fileServer := http.FileServer(http.Dir(distDir))
+
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		// Try chi router first
 		rctx := chi.NewRouteContext()
 		if r.Match(rctx, req.Method, req.URL.Path) {
 			r.ServeHTTP(w, req)
+			return
+		}
+		// Try serving static file from dist directory
+		filePath := filepath.Join(distDir, req.URL.Path)
+		if info, err := os.Stat(filePath); err == nil && !info.IsDir() {
+			fileServer.ServeHTTP(w, req)
 			return
 		}
 		// Fallback to SPA index.html

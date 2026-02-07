@@ -1,0 +1,40 @@
+[
+  {
+    "id": "video-1",
+    "title": "テスト動画1 サンプル",
+    "url": "https://example.com/video-1",
+    "date": "2024-01-15",
+    "actors": ["出演者A", "出演者B"],
+    "tags": ["タグ1", "タグ2"],
+    "jpg": "/video-1/thumb.jpg",
+    "pictures_dir": "/video-1/pictures",
+    "formats": {
+      "1080p": "/video-1/1080p.mp4",
+      "720p": "/video-1/720p.mp4"
+    }
+  },
+  {
+    "id": "video-2",
+    "title": "テスト動画2",
+    "url": "https://example.com/video-2",
+    "date": "2024-02-20",
+    "actors": ["出演者C"],
+    "tags": ["タグ3"],
+    "jpg": "/video-2/thumb.jpg",
+    "pictures_dir": "/video-2/pictures",
+    "formats": {
+      "720p": "/video-2/720p.mp4"
+    }
+  },
+  {
+    "id": "video-3",
+    "title": "テスト動画3 空データ",
+    "url": "",
+    "date": "2024-03-10",
+    "actors": [],
+    "tags": [],
+    "jpg": "/video-3/thumb.jpg",
+    "pictures_dir": "",
+    "formats": {}
+  }
+]

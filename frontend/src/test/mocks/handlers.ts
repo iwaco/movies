@@ -111,10 +111,13 @@ export const handlers = [
     return HttpResponse.json(video)
   }),
 
-  http.get('/api/v1/videos/:id/pictures', () => {
-    return HttpResponse.json({
-      pictures: ['/pictures/pic1.jpg', '/pictures/pic2.jpg', '/pictures/pic3.jpg'],
-    })
+  http.get('/api/v1/videos/:id/pictures', ({ params }) => {
+    if (params.id === 'video-1') {
+      return HttpResponse.json({
+        pictures: ['/pictures/pic1.jpg', '/pictures/pic2.jpg', '/pictures/pic3.jpg'],
+      })
+    }
+    return HttpResponse.json({ pictures: [] })
   }),
 
   http.get('/api/v1/favorites', () => {

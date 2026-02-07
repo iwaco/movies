@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { SELECTORS } from '../helpers/selectors';
-import { VIDEO_1, VIDEO_2, VIDEO_3, TOTAL_VIDEOS } from '../helpers/test-data';
+import { VIDEO_1, VIDEO_2, VIDEO_3, TOTAL_VIDEOS_WITH_FORMAT } from '../helpers/test-data';
 
 /** カード数をカウントするセレクタ（各カードに img が1つ） */
 const cardImg = '.grid a[href^="/videos/"] img';
@@ -27,7 +27,7 @@ test.describe('F: フィルタリング（タグ・出演者）', () => {
     await expect(page.locator(cardImg)).toHaveCount(1);
 
     await page.selectOption(SELECTORS.tagFilter, '');
-    await expect(page.locator(cardImg)).toHaveCount(TOTAL_VIDEOS);
+    await expect(page.locator(cardImg)).toHaveCount(TOTAL_VIDEOS_WITH_FORMAT);
   });
 
   test('F-4: タグフィルタのオプション一覧', async ({ page }) => {
@@ -51,7 +51,7 @@ test.describe('F: フィルタリング（タグ・出演者）', () => {
     await expect(page.locator(cardImg)).toHaveCount(1);
 
     await page.selectOption(SELECTORS.actorFilter, '');
-    await expect(page.locator(cardImg)).toHaveCount(TOTAL_VIDEOS);
+    await expect(page.locator(cardImg)).toHaveCount(TOTAL_VIDEOS_WITH_FORMAT);
   });
 
   test('F-8: 出演者フィルタのオプション一覧', async ({ page }) => {

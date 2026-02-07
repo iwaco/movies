@@ -298,6 +298,51 @@ func TestVideoRepositoryListTags(t *testing.T) {
 	}
 }
 
+func TestVideoRepositoryFilterByHasVideo(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+	seedTestData(t, db)
+
+	repo := NewVideoRepository(db)
+	result, err := repo.List(model.VideoQueryParams{
+		Page: 1, PerPage: 20, Sort: "date_desc", HasVideo: true,
+	})
+	if err != nil {
+		t.Fatalf("failed: %v", err)
+	}
+	if result.Total != 2 {
+		t.Errorf("expected 2 videos with formats, got %d", result.Total)
+	}
+	// vid1 and vid2 have formats, vid3 does not
+	ids := map[string]bool{}
+	for _, v := range result.Data {
+		ids[v.ID] = true
+	}
+	if !ids["vid1"] || !ids["vid2"] {
+		t.Errorf("expected vid1 and vid2, got %v", ids)
+	}
+	if ids["vid3"] {
+		t.Error("vid3 should not be included (no formats)")
+	}
+}
+
+func TestVideoRepositoryFilterByHasVideoFalse(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+	seedTestData(t, db)
+
+	repo := NewVideoRepository(db)
+	result, err := repo.List(model.VideoQueryParams{
+		Page: 1, PerPage: 20, Sort: "date_desc", HasVideo: false,
+	})
+	if err != nil {
+		t.Fatalf("failed: %v", err)
+	}
+	if result.Total != 3 {
+		t.Errorf("expected 3 videos (all), got %d", result.Total)
+	}
+}
+
 func TestVideoRepositoryListActors(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()

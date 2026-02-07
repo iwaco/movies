@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { SELECTORS } from '../helpers/selectors';
-import { VIDEO_1, VIDEO_2, TOTAL_VIDEOS } from '../helpers/test-data';
+import { VIDEO_1, VIDEO_2, TOTAL_VIDEOS_WITH_FORMAT } from '../helpers/test-data';
 
 /** カード数をカウントするセレクタ（各カードに img が1つ） */
 const cardImg = '.grid a[href^="/videos/"] img';
@@ -30,7 +30,7 @@ test.describe('S: 検索', () => {
 
     await page.fill(SELECTORS.searchInput, '');
     await page.waitForTimeout(500);
-    await expect(page.locator(cardImg)).toHaveCount(TOTAL_VIDEOS);
+    await expect(page.locator(cardImg)).toHaveCount(TOTAL_VIDEOS_WITH_FORMAT);
   });
 
   test('S-4: 検索がデバウンスされる（300ms）', async ({ page }) => {

@@ -12,10 +12,11 @@ export function VideoListPage() {
   const q = searchParams.get('q') || ''
   const tag = searchParams.get('tag') || ''
   const actor = searchParams.get('actor') || ''
+  const hasVideo = searchParams.get('has_video') !== 'false'
 
   const { data } = useQuery({
-    queryKey: ['videos', page, q, tag, actor],
-    queryFn: () => fetchVideos({ page, q, tag, actor }),
+    queryKey: ['videos', page, q, tag, actor, hasVideo],
+    queryFn: () => fetchVideos({ page, q, tag, actor, has_video: hasVideo }),
   })
 
   const handlePageChange = (newPage: number) => {

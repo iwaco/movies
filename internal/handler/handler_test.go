@@ -46,15 +46,17 @@ func seedHandlerTestData(t *testing.T, db *database.DB) {
 	queries := []string{
 		`INSERT INTO videos (id, title, url, date, jpg, pictures_dir) VALUES
 			('vid1', 'First Video', 'https://example.com/1', '2024-01-15', '/thumb1.jpg', '/pics/vid1/'),
-			('vid2', 'Second Video', 'https://example.com/2', '2024-02-20', '/thumb2.jpg', '/pics/vid2/')`,
+			('vid2', 'Second Video', 'https://example.com/2', '2024-02-20', '/thumb2.jpg', '/pics/vid2/'),
+			('vid3', 'Third Video', 'https://example.com/3', '2024-03-10', '/thumb3.jpg', '/pics/vid3/')`,
 		`INSERT INTO actors (name) VALUES ('Actor A'), ('Actor B')`,
 		`INSERT INTO tags (name) VALUES ('tag1'), ('tag2')`,
 		`INSERT INTO video_actors (video_id, actor_id) VALUES ('vid1', 1), ('vid2', 2)`,
 		`INSERT INTO video_tags (video_id, tag_id) VALUES ('vid1', 1), ('vid2', 2)`,
-		`INSERT INTO video_formats (video_id, name, file_path) VALUES ('vid1', '720p', '/720p.mp4')`,
+		`INSERT INTO video_formats (video_id, name, file_path) VALUES ('vid1', '720p', '/720p.mp4'), ('vid2', '480p', '/480p.mp4')`,
 		`INSERT INTO videos_fts (video_id, title, actors, tags) VALUES
 			('vid1', 'First Video', 'Actor A', 'tag1'),
-			('vid2', 'Second Video', 'Actor B', 'tag2')`,
+			('vid2', 'Second Video', 'Actor B', 'tag2'),
+			('vid3', 'Third Video', '', '')`,
 	}
 	for _, q := range queries {
 		if _, err := db.Exec(q); err != nil {
@@ -84,8 +86,8 @@ func TestListVideos(t *testing.T) {
 	var result map[string]interface{}
 	json.NewDecoder(resp.Body).Decode(&result)
 
-	if result["total"].(float64) != 2 {
-		t.Errorf("expected total 2, got %v", result["total"])
+	if result["total"].(float64) != 3 {
+		t.Errorf("expected total 3, got %v", result["total"])
 	}
 }
 
@@ -271,6 +273,77 @@ func TestImportHandler(t *testing.T) {
 
 	if result["imported"].(float64) != 1 {
 		t.Errorf("expected 1 imported, got %v", result["imported"])
+	}
+}
+
+func TestListVideosHasVideoTrue(t *testing.T) {
+	r, db := setupTestRouter(t)
+	defer db.Close()
+	seedHandlerTestData(t, db)
+
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+
+	resp, err := http.Get(ts.URL + "/api/v1/videos?has_video=true")
+	if err != nil {
+		t.Fatalf("failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("expected 200, got %d", resp.StatusCode)
+	}
+
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+
+	if result["total"].(float64) != 2 {
+		t.Errorf("expected 2 videos with formats, got %v", result["total"])
+	}
+}
+
+func TestListVideosHasVideoFalse(t *testing.T) {
+	r, db := setupTestRouter(t)
+	defer db.Close()
+	seedHandlerTestData(t, db)
+
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+
+	resp, err := http.Get(ts.URL + "/api/v1/videos?has_video=false")
+	if err != nil {
+		t.Fatalf("failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("expected 200, got %d", resp.StatusCode)
+	}
+
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+
+	if result["total"].(float64) != 3 {
+		t.Errorf("expected 3 videos (all), got %v", result["total"])
+	}
+}
+
+func TestListVideosHasVideoInvalid(t *testing.T) {
+	r, db := setupTestRouter(t)
+	defer db.Close()
+	seedHandlerTestData(t, db)
+
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+
+	resp, err := http.Get(ts.URL + "/api/v1/videos?has_video=invalid")
+	if err != nil {
+		t.Fatalf("failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Errorf("expected 400, got %d", resp.StatusCode)
 	}
 }
 

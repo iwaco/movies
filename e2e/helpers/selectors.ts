@@ -7,6 +7,7 @@ export const SELECTORS = {
   // フィルタ
   tagFilter: '#tag-filter',
   actorFilter: '#actor-filter',
+  hasVideoFilter: '#has-video-filter',
 
   // ページネーション
   prevButton: 'button:has-text("前へ")',

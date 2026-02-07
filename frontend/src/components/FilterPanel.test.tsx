@@ -56,4 +56,20 @@ describe('FilterPanel', () => {
     await user.selectOptions(actorSelect, 'Actor A')
     expect(actorSelect).toHaveValue('Actor A')
   })
+
+  it('renders has-video checkbox checked by default', () => {
+    renderWithProviders(<FilterPanel />)
+    const checkbox = screen.getByLabelText('動画のみ')
+    expect(checkbox).toBeInTheDocument()
+    expect(checkbox).toBeChecked()
+  })
+
+  it('allows toggling has-video filter off', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<FilterPanel />)
+    const checkbox = screen.getByLabelText('動画のみ')
+    expect(checkbox).toBeChecked()
+    await user.click(checkbox)
+    expect(checkbox).not.toBeChecked()
+  })
 })

@@ -49,6 +49,9 @@ func (r *VideoRepository) List(params model.VideoQueryParams) (*model.VideoListR
 	if params.Favorite {
 		where = append(where, "v.id IN (SELECT video_id FROM favorites)")
 	}
+	if params.HasVideo {
+		where = append(where, "EXISTS (SELECT 1 FROM video_formats vf WHERE vf.video_id = v.id)")
+	}
 
 	whereClause := strings.Join(where, " AND ")
 

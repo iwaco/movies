@@ -36,5 +36,9 @@ export const VIDEO_3 = {
 export const ALL_VIDEOS = [VIDEO_1, VIDEO_2, VIDEO_3] as const;
 export const TOTAL_VIDEOS = ALL_VIDEOS.length;
 
+/** フォーマット（動画ファイル）を持つ動画のみ（デフォルト表示） */
+export const VIDEOS_WITH_FORMAT = [VIDEO_1, VIDEO_2] as const;
+export const TOTAL_VIDEOS_WITH_FORMAT = VIDEOS_WITH_FORMAT.length;
+
 export const ALL_TAGS = ['タグ1', 'タグ2', 'タグ3'] as const;
 export const ALL_ACTORS = ['出演者A', '出演者B', '出演者C'] as const;

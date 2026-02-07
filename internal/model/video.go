@@ -43,6 +43,7 @@ type VideoQueryParams struct {
 	DateTo   string
 	Sort     string
 	Favorite bool
+	HasVideo bool
 }
 
 type VideoListResult struct {

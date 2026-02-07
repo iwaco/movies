@@ -87,7 +87,7 @@ export function FilterPanel() {
         </select>
       </div>
       <div className="flex items-center">
-        <label htmlFor="has-video-filter" className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300">
+        <label className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300">
           <input
             type="checkbox"
             id="has-video-filter"

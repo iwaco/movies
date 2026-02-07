@@ -1,6 +1,6 @@
 import { test, expect, type Route } from '@playwright/test';
 import { SELECTORS } from '../helpers/selectors';
-import { TOTAL_VIDEOS } from '../helpers/test-data';
+import { TOTAL_VIDEOS_WITH_FORMAT } from '../helpers/test-data';
 
 /** API レスポンスを per_page=1 に上書きするルートハンドラ。
  * route.fetch() は常に page=1 で全件取得し、クライアント側でスライスする */
@@ -60,11 +60,11 @@ test.describe('P: ページネーション', () => {
 
     await page.goto('/');
     await page.waitForSelector(SELECTORS.searchInput);
-    await expect(page.getByText(`1 / ${TOTAL_VIDEOS}`)).toBeVisible();
+    await expect(page.getByText(`1 / ${TOTAL_VIDEOS_WITH_FORMAT}`)).toBeVisible();
 
     await page.locator(SELECTORS.nextButton).click();
     await expect(page).toHaveURL(/page=2/);
-    await expect(page.getByText(`2 / ${TOTAL_VIDEOS}`)).toBeVisible();
+    await expect(page.getByText(`2 / ${TOTAL_VIDEOS_WITH_FORMAT}`)).toBeVisible();
   });
 
   test('P-3: 前ページへ遷移', async ({ page }) => {
@@ -72,10 +72,10 @@ test.describe('P: ページネーション', () => {
 
     await page.goto('/?page=2');
     await page.waitForSelector(SELECTORS.searchInput);
-    await expect(page.getByText(`2 / ${TOTAL_VIDEOS}`)).toBeVisible();
+    await expect(page.getByText(`2 / ${TOTAL_VIDEOS_WITH_FORMAT}`)).toBeVisible();
 
     await page.locator(SELECTORS.prevButton).click();
-    await expect(page.getByText(`1 / ${TOTAL_VIDEOS}`)).toBeVisible();
+    await expect(page.getByText(`1 / ${TOTAL_VIDEOS_WITH_FORMAT}`)).toBeVisible();
   });
 
   test('P-4: 1ページ目で「前へ」が無効', async ({ page }) => {
@@ -99,7 +99,7 @@ test.describe('P: ページネーション', () => {
 
     await page.goto('/?page=2');
     await page.waitForSelector(SELECTORS.searchInput);
-    await expect(page.getByText(`2 / ${TOTAL_VIDEOS}`)).toBeVisible();
+    await expect(page.getByText(`2 / ${TOTAL_VIDEOS_WITH_FORMAT}`)).toBeVisible();
 
     // タグフィルタ適用でページリセット
     await page.selectOption(SELECTORS.tagFilter, 'タグ1');

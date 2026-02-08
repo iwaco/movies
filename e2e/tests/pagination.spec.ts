@@ -1,6 +1,7 @@
 import { test, expect, type Route } from '@playwright/test';
 import { SELECTORS } from '../helpers/selectors';
 import { TOTAL_VIDEOS_WITH_FORMAT } from '../helpers/test-data';
+import { clickTagButton } from '../helpers/tag-cloud';
 
 /** API レスポンスを per_page=1 に上書きするルートハンドラ。
  * route.fetch() は常に page=1 で全件取得し、クライアント側でスライスする */
@@ -93,7 +94,7 @@ test.describe('P: ページネーション', () => {
   test('P-6: フィルタ適用後のページネーション', async ({ page }) => {
     await page.route(videosListPattern, (route) =>
       paginateRoute(route, {
-        passthrough: (url) => !!url.searchParams.get('tag'),
+        passthrough: (url) => url.searchParams.getAll('tag').length > 0,
       }),
     );
 
@@ -102,7 +103,7 @@ test.describe('P: ページネーション', () => {
     await expect(page.getByText(`2 / ${TOTAL_VIDEOS_WITH_FORMAT}`)).toBeVisible();
 
     // タグフィルタ適用でページリセット
-    await page.selectOption(SELECTORS.tagFilter, 'タグ1');
+    await clickTagButton(page, 'タグ1');
     await expect(page.getByText('1 / 1')).toBeVisible();
   });
 });

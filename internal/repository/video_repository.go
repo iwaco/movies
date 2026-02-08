@@ -16,15 +16,23 @@ func NewVideoRepository(db *sql.DB) *VideoRepository {
 	return &VideoRepository{db: db}
 }
 
+func escapeLike(s string) string {
+	r := strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`)
+	return r.Replace(s)
+}
+
 func (r *VideoRepository) List(params model.VideoQueryParams) (*model.VideoListResult, error) {
 	where := []string{"1=1"}
 	args := []interface{}{}
 	argIdx := 1
 
 	if params.Query != "" {
-		where = append(where, fmt.Sprintf("v.id IN (SELECT video_id FROM videos_fts WHERE videos_fts MATCH $%d)", argIdx))
-		args = append(args, params.Query+"*")
-		argIdx++
+		escaped := "%" + escapeLike(params.Query) + "%"
+		where = append(where, fmt.Sprintf(
+			"(v.title LIKE $%d ESCAPE '\\' OR v.id IN (SELECT va.video_id FROM video_actors va JOIN actors a ON a.id = va.actor_id WHERE a.name LIKE $%d ESCAPE '\\') OR v.id IN (SELECT vt.video_id FROM video_tags vt JOIN tags t ON t.id = vt.tag_id WHERE t.name LIKE $%d ESCAPE '\\'))",
+			argIdx, argIdx+1, argIdx+2))
+		args = append(args, escaped, escaped, escaped)
+		argIdx += 3
 	}
 	for _, tag := range params.Tags {
 		where = append(where, fmt.Sprintf("v.id IN (SELECT vt.video_id FROM video_tags vt JOIN tags t ON t.id = vt.tag_id WHERE t.name = $%d)", argIdx))

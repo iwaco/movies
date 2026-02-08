@@ -19,6 +19,6 @@ FROM gcr.io/distroless/static-debian12:nonroot
 WORKDIR /app
 COPY --from=backend-build /build/server /app/server
 COPY --from=frontend-build /build/dist/ /app/frontend/dist/
-USER nonroot
+USER 65532:65532
 EXPOSE 8080
 ENTRYPOINT ["/app/server"]

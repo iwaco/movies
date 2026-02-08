@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movies
+  namespace: movies
+  labels:
+    app: movies
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: movies
+  template:
+    metadata:
+      labels:
+        app: movies
+    spec:
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 65532
+      containers:
+        - name: movies
+          image: ghcr.io/iwaco/movies:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MOVIES_DB_PATH
+              value: /data/movies.db
+            - name: MOVIES_MEDIA_ROOT
+              value: /data/media
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+            limits:
+              memory: 256Mi
+              cpu: 500m
+          securityContext:
+            readOnlyRootFilesystem: true
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: movies-data

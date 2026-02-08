@@ -23,6 +23,7 @@ func New(db *sql.DB, cfg *config.Config) *chi.Mux {
 	vh := handler.NewVideoHandler(videoRepo, cfg.MediaRoot)
 	rh := handler.NewRatingHandler(ratingRepo)
 	ih := handler.NewImportHandler(imp)
+	hh := handler.NewHealthHandler(db)
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
@@ -34,6 +35,9 @@ func New(db *sql.DB, cfg *config.Config) *chi.Mux {
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
+
+	r.Get("/healthz", hh.Healthz)
+	r.Get("/readyz", hh.Readyz)
 
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/videos", vh.List)

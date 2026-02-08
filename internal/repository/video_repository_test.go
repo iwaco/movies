@@ -28,7 +28,7 @@ func seedTestData(t *testing.T, db *database.DB) {
 		`INSERT INTO video_actors (video_id, actor_id) VALUES ('vid1', 1), ('vid1', 2), ('vid2', 2), ('vid2', 3), ('vid3', 1)`,
 		`INSERT INTO video_tags (video_id, tag_id) VALUES ('vid1', 1), ('vid1', 2), ('vid2', 2), ('vid2', 3), ('vid3', 3)`,
 		`INSERT INTO video_formats (video_id, name, file_path) VALUES ('vid1', '720p', '/720p_1.mp4'), ('vid1', '1080p', '/1080p_1.mp4'), ('vid2', '480p', '/480p_2.mp4')`,
-		`INSERT INTO favorites (video_id) VALUES ('vid1')`,
+		`INSERT INTO ratings (video_id, rating) VALUES ('vid1', 4)`,
 		`INSERT INTO videos_fts (video_id, title, actors, tags) VALUES
 			('vid1', 'First Video', 'Actor A,Actor B', 'tag1,tag2'),
 			('vid2', 'Second Video', 'Actor B,Actor C', 'tag2,tag3'),
@@ -107,8 +107,8 @@ func TestVideoRepositoryListWithActorsAndTags(t *testing.T) {
 	if len(vid1.Formats) != 2 {
 		t.Errorf("expected 2 formats for vid1, got %d", len(vid1.Formats))
 	}
-	if !vid1.IsFavorite {
-		t.Error("expected vid1 to be a favorite")
+	if vid1.Rating != 4 {
+		t.Errorf("expected vid1 rating 4, got %d", vid1.Rating)
 	}
 }
 
@@ -298,20 +298,20 @@ func TestVideoRepositoryFilterByDateRange(t *testing.T) {
 	}
 }
 
-func TestVideoRepositoryFilterByFavorite(t *testing.T) {
+func TestVideoRepositoryFilterByMinRating(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 	seedTestData(t, db)
 
 	repo := NewVideoRepository(db)
 	result, err := repo.List(model.VideoQueryParams{
-		Page: 1, PerPage: 20, Sort: "date_desc", Favorite: true,
+		Page: 1, PerPage: 20, Sort: "date_desc", MinRating: 4,
 	})
 	if err != nil {
 		t.Fatalf("failed: %v", err)
 	}
 	if result.Total != 1 {
-		t.Errorf("expected 1 favorite video, got %d", result.Total)
+		t.Errorf("expected 1 video with rating >= 4, got %d", result.Total)
 	}
 	if result.Data[0].ID != "vid1" {
 		t.Errorf("expected vid1, got %s", result.Data[0].ID)

@@ -47,10 +47,10 @@ func TestNewDB(t *testing.T) {
 		t.Fatalf("video_formats table should exist: %v", err)
 	}
 
-	// Verify favorites table exists
-	_, err = db.Exec("INSERT INTO favorites (video_id) VALUES ('test1')")
+	// Verify ratings table exists
+	_, err = db.Exec("INSERT INTO ratings (video_id, rating) VALUES ('test1', 3)")
 	if err != nil {
-		t.Fatalf("favorites table should exist: %v", err)
+		t.Fatalf("ratings table should exist: %v", err)
 	}
 
 	// Verify videos_fts virtual table exists

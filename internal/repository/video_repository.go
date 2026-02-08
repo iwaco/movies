@@ -46,8 +46,10 @@ func (r *VideoRepository) List(params model.VideoQueryParams) (*model.VideoListR
 		args = append(args, params.DateTo)
 		argIdx++
 	}
-	if params.Favorite {
-		where = append(where, "v.id IN (SELECT video_id FROM favorites)")
+	if params.MinRating > 0 {
+		where = append(where, fmt.Sprintf("v.id IN (SELECT video_id FROM ratings WHERE rating >= $%d)", argIdx))
+		args = append(args, params.MinRating)
+		argIdx++
 	}
 	if params.HasVideo {
 		where = append(where, "EXISTS (SELECT 1 FROM video_formats vf WHERE vf.video_id = v.id)")
@@ -110,7 +112,7 @@ func (r *VideoRepository) List(params model.VideoQueryParams) (*model.VideoListR
 		return nil, err
 	}
 
-	// Load actors, tags, formats, favorite status for each video
+	// Load actors, tags, formats, rating for each video
 	for i := range videos {
 		if err := r.loadRelations(&videos[i]); err != nil {
 			return nil, err
@@ -232,10 +234,12 @@ func (r *VideoRepository) loadRelations(v *model.Video) error {
 		return err
 	}
 
-	// Favorite
-	var count int
-	r.db.QueryRow("SELECT COUNT(*) FROM favorites WHERE video_id = $1", v.ID).Scan(&count)
-	v.IsFavorite = count > 0
+	// Rating
+	var rating sql.NullInt64
+	r.db.QueryRow("SELECT rating FROM ratings WHERE video_id = $1", v.ID).Scan(&rating)
+	if rating.Valid {
+		v.Rating = int(rating.Int64)
+	}
 
 	return nil
 }

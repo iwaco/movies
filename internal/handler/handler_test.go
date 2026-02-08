@@ -27,11 +27,11 @@ func setupTestRouterWithMediaRoot(t *testing.T, mediaRoot string) (*chi.Mux, *da
 	}
 
 	videoRepo := repository.NewVideoRepository(db)
-	favRepo := repository.NewFavoriteRepository(db)
+	ratingRepo := repository.NewRatingRepository(db)
 	imp := importer.New(db)
 
 	vh := NewVideoHandler(videoRepo, mediaRoot)
-	fh := NewFavoriteHandler(favRepo)
+	rh := NewRatingHandler(ratingRepo)
 	ih := NewImportHandler(imp)
 
 	r := chi.NewRouter()
@@ -40,9 +40,8 @@ func setupTestRouterWithMediaRoot(t *testing.T, mediaRoot string) (*chi.Mux, *da
 	r.Get("/api/v1/videos/{id}/pictures", vh.GetPictures)
 	r.Get("/api/v1/tags", vh.ListTags)
 	r.Get("/api/v1/actors", vh.ListActors)
-	r.Get("/api/v1/favorites", fh.List)
-	r.Post("/api/v1/favorites", fh.Add)
-	r.Delete("/api/v1/favorites/{videoID}", fh.Remove)
+	r.Put("/api/v1/ratings/{videoID}", rh.Set)
+	r.Delete("/api/v1/ratings/{videoID}", rh.Remove)
 	r.Post("/api/v1/import", ih.Import)
 
 	return r, db
@@ -196,7 +195,7 @@ func TestListActors(t *testing.T) {
 	}
 }
 
-func TestAddAndRemoveFavorite(t *testing.T) {
+func TestSetAndRemoveRating(t *testing.T) {
 	r, db := setupTestRouter(t)
 	defer db.Close()
 	seedHandlerTestData(t, db)
@@ -204,35 +203,36 @@ func TestAddAndRemoveFavorite(t *testing.T) {
 	ts := httptest.NewServer(r)
 	defer ts.Close()
 
-	// Add favorite
-	body := bytes.NewBufferString(`{"video_id": "vid1"}`)
-	resp, err := http.Post(ts.URL+"/api/v1/favorites", "application/json", body)
+	// Set rating
+	body := bytes.NewBufferString(`{"rating": 4}`)
+	req, _ := http.NewRequest(http.MethodPut, ts.URL+"/api/v1/ratings/vid1", body)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		t.Fatalf("failed: %v", err)
 	}
 	resp.Body.Close()
 
-	if resp.StatusCode != http.StatusCreated {
-		t.Errorf("expected 201, got %d", resp.StatusCode)
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("expected 200, got %d", resp.StatusCode)
 	}
 
-	// List favorites
-	resp, err = http.Get(ts.URL + "/api/v1/favorites")
+	// Verify rating via video detail
+	resp, err = http.Get(ts.URL + "/api/v1/videos/vid1")
 	if err != nil {
 		t.Fatalf("failed: %v", err)
 	}
 	defer resp.Body.Close()
 
-	var result map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&result)
+	var video map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&video)
 
-	favorites := result["favorites"].([]interface{})
-	if len(favorites) != 1 {
-		t.Errorf("expected 1 favorite, got %d", len(favorites))
+	if video["rating"].(float64) != 4 {
+		t.Errorf("expected rating 4, got %v", video["rating"])
 	}
 
-	// Remove favorite
-	req, _ := http.NewRequest(http.MethodDelete, ts.URL+"/api/v1/favorites/vid1", nil)
+	// Remove rating
+	req, _ = http.NewRequest(http.MethodDelete, ts.URL+"/api/v1/ratings/vid1", nil)
 	resp2, err := http.DefaultClient.Do(req)
 	if err != nil {
 		t.Fatalf("failed: %v", err)

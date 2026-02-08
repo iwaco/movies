@@ -17,11 +17,11 @@ import (
 
 func New(db *sql.DB, cfg *config.Config) *chi.Mux {
 	videoRepo := repository.NewVideoRepository(db)
-	favRepo := repository.NewFavoriteRepository(db)
+	ratingRepo := repository.NewRatingRepository(db)
 	imp := importer.New(db)
 
 	vh := handler.NewVideoHandler(videoRepo, cfg.MediaRoot)
-	fh := handler.NewFavoriteHandler(favRepo)
+	rh := handler.NewRatingHandler(ratingRepo)
 	ih := handler.NewImportHandler(imp)
 
 	r := chi.NewRouter()
@@ -41,9 +41,8 @@ func New(db *sql.DB, cfg *config.Config) *chi.Mux {
 		r.Get("/videos/{id}/pictures", vh.GetPictures)
 		r.Get("/tags", vh.ListTags)
 		r.Get("/actors", vh.ListActors)
-		r.Get("/favorites", fh.List)
-		r.Post("/favorites", fh.Add)
-		r.Delete("/favorites/{videoID}", fh.Remove)
+		r.Put("/ratings/{videoID}", rh.Set)
+		r.Delete("/ratings/{videoID}", rh.Remove)
 		r.Post("/import", ih.Import)
 	})
 

@@ -49,17 +49,22 @@ func (h *VideoHandler) List(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	var minRating int
+	if raw := r.URL.Query().Get("min_rating"); raw != "" {
+		minRating, _ = strconv.Atoi(raw)
+	}
+
 	params := model.VideoQueryParams{
-		Page:     page,
-		PerPage:  perPage,
-		Query:    r.URL.Query().Get("q"),
-		Tags:     r.URL.Query()["tag"],
-		Actors:   r.URL.Query()["actor"],
-		DateFrom: r.URL.Query().Get("date_from"),
-		DateTo:   r.URL.Query().Get("date_to"),
-		Sort:     sort,
-		Favorite: r.URL.Query().Get("favorite") == "true",
-		HasVideo: hasVideo,
+		Page:      page,
+		PerPage:   perPage,
+		Query:     r.URL.Query().Get("q"),
+		Tags:      r.URL.Query()["tag"],
+		Actors:    r.URL.Query()["actor"],
+		DateFrom:  r.URL.Query().Get("date_from"),
+		DateTo:    r.URL.Query().Get("date_to"),
+		Sort:      sort,
+		MinRating: minRating,
+		HasVideo:  hasVideo,
 	}
 
 	result, err := h.repo.List(params)

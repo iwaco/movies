@@ -64,6 +64,21 @@ describe('VideoDetailPage', () => {
     })
   })
 
+  it('renders image heading when video has pictures', async () => {
+    renderWithProviders('video-1')
+    await waitFor(() => {
+      expect(screen.getByText('画像')).toBeInTheDocument()
+    })
+  })
+
+  it('does not render image heading when video has no pictures', async () => {
+    renderWithProviders('video-2')
+    await waitFor(() => {
+      expect(screen.getByText('Test Video 2')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('画像')).not.toBeInTheDocument()
+  })
+
   it('renders page without VideoPlayer when formats is empty', async () => {
     renderWithProviders('video-3')
     await waitFor(() => {

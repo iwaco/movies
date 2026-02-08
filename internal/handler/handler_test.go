@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
@@ -14,6 +16,10 @@ import (
 )
 
 func setupTestRouter(t *testing.T) (*chi.Mux, *database.DB) {
+	return setupTestRouterWithMediaRoot(t, "/test-media")
+}
+
+func setupTestRouterWithMediaRoot(t *testing.T, mediaRoot string) (*chi.Mux, *database.DB) {
 	t.Helper()
 	db, err := database.New(":memory:")
 	if err != nil {
@@ -24,13 +30,14 @@ func setupTestRouter(t *testing.T) (*chi.Mux, *database.DB) {
 	favRepo := repository.NewFavoriteRepository(db)
 	imp := importer.New(db)
 
-	vh := NewVideoHandler(videoRepo, "/test-media")
+	vh := NewVideoHandler(videoRepo, mediaRoot)
 	fh := NewFavoriteHandler(favRepo)
 	ih := NewImportHandler(imp)
 
 	r := chi.NewRouter()
 	r.Get("/api/v1/videos", vh.List)
 	r.Get("/api/v1/videos/{id}", vh.GetByID)
+	r.Get("/api/v1/videos/{id}/pictures", vh.GetPictures)
 	r.Get("/api/v1/tags", vh.ListTags)
 	r.Get("/api/v1/actors", vh.ListActors)
 	r.Get("/api/v1/favorites", fh.List)
@@ -273,6 +280,104 @@ func TestImportHandler(t *testing.T) {
 
 	if result["imported"].(float64) != 1 {
 		t.Errorf("expected 1 imported, got %v", result["imported"])
+	}
+}
+
+func TestGetPictures_NotFound(t *testing.T) {
+	r, db := setupTestRouter(t)
+	defer db.Close()
+
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+
+	resp, err := http.Get(ts.URL + "/api/v1/videos/nonexistent/pictures")
+	if err != nil {
+		t.Fatalf("failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusNotFound {
+		t.Errorf("expected 404, got %d", resp.StatusCode)
+	}
+}
+
+func TestGetPictures_EmptyArray(t *testing.T) {
+	r, db := setupTestRouter(t)
+	defer db.Close()
+	seedHandlerTestData(t, db)
+
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+
+	// vid1 exists but /test-media directory does not, so pictures should be []
+	resp, err := http.Get(ts.URL + "/api/v1/videos/vid1/pictures")
+	if err != nil {
+		t.Fatalf("failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("expected 200, got %d", resp.StatusCode)
+	}
+
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+
+	pictures, ok := result["pictures"].([]interface{})
+	if !ok {
+		t.Fatalf("expected pictures to be an array, got %T (%v)", result["pictures"], result["pictures"])
+	}
+	if len(pictures) != 0 {
+		t.Errorf("expected 0 pictures, got %d", len(pictures))
+	}
+}
+
+func TestGetPictures_WithImages(t *testing.T) {
+	// Create a temporary directory with test images
+	tmpDir := t.TempDir()
+	picsDir := filepath.Join(tmpDir, "pics", "vid1")
+	if err := os.MkdirAll(picsDir, 0755); err != nil {
+		t.Fatalf("failed to create pics dir: %v", err)
+	}
+
+	// Create test image files
+	for _, name := range []string{"img1.jpg", "img2.png", "not_image.txt"} {
+		if err := os.WriteFile(filepath.Join(picsDir, name), []byte("fake"), 0644); err != nil {
+			t.Fatalf("failed to create test file: %v", err)
+		}
+	}
+
+	r, db := setupTestRouterWithMediaRoot(t, tmpDir)
+	defer db.Close()
+	seedHandlerTestData(t, db)
+
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+
+	resp, err := http.Get(ts.URL + "/api/v1/videos/vid1/pictures")
+	if err != nil {
+		t.Fatalf("failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("expected 200, got %d", resp.StatusCode)
+	}
+
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+
+	pictures := result["pictures"].([]interface{})
+	if len(pictures) != 2 {
+		t.Fatalf("expected 2 pictures, got %d: %v", len(pictures), pictures)
+	}
+
+	// Verify paths start with /
+	for _, p := range pictures {
+		path := p.(string)
+		if path[0] != '/' {
+			t.Errorf("expected path to start with /, got %s", path)
+		}
 	}
 }
 

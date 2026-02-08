@@ -89,7 +89,7 @@ func (h *VideoHandler) GetPictures(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var pictures []string
+	pictures := make([]string, 0)
 	dir := video.PicturesDir
 	entries, err := os.ReadDir(filepath.Join(h.mediaRoot, dir))
 	if err == nil {
@@ -98,7 +98,7 @@ func (h *VideoHandler) GetPictures(w http.ResponseWriter, r *http.Request) {
 			if !entry.IsDir() {
 				ext := strings.ToLower(filepath.Ext(entry.Name()))
 				if imageExts[ext] {
-					pictures = append(pictures, filepath.Join(dir, entry.Name()))
+					pictures = append(pictures, filepath.Join("/", dir, entry.Name()))
 				}
 			}
 		}

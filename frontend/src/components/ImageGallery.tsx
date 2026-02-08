@@ -11,15 +11,16 @@ interface ImageGalleryProps {
 export function ImageGallery({ videoId }: ImageGalleryProps) {
   const [lightboxIndex, setLightboxIndex] = useState(-1)
 
-  const { data: pictures } = useQuery({
+  const { data: pictures, isLoading, isError } = useQuery({
     queryKey: ['pictures', videoId],
     queryFn: () => fetchVideoPictures(videoId),
   })
 
-  if (!pictures) return null
+  if (isLoading || isError || !pictures || pictures.length === 0) return null
 
   return (
     <div>
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">画像</h2>
       <div className="grid grid-cols-4 gap-2">
         {pictures.map((pic, index) => (
           <img

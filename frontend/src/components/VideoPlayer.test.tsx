@@ -37,4 +37,19 @@ describe('VideoPlayer', () => {
     const video = document.querySelector('video source') as HTMLSourceElement
     expect(video.src).toContain('/media/videos/video1/1080p.mp4')
   })
+
+  it('renders nothing when formats is empty', () => {
+    const { container } = render(<VideoPlayer formats={[]} />)
+    expect(container.innerHTML).toBe('')
+  })
+
+  it('updates video source when formats prop changes', () => {
+    const newFormats: VideoFormat[] = [
+      { id: 10, name: '480p', file_path: '/videos/video2/480p.mp4' },
+    ]
+    const { rerender } = render(<VideoPlayer formats={mockFormats} />)
+    rerender(<VideoPlayer formats={newFormats} />)
+    const source = document.querySelector('video source') as HTMLSourceElement
+    expect(source.src).toContain('/media/videos/video2/480p.mp4')
+  })
 })

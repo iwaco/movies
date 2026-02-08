@@ -40,22 +40,12 @@ test.describe('D: 詳細ページ表示', () => {
   });
 
   test('D-4: 出演者が0人の場合', async ({ page }) => {
-    // 既知のバグ: VIDEO_3 は formats が空のため VideoPlayer がクラッシュする。
-    // ページが描画されない可能性がある。
     await page.goto(`/videos/${VIDEO_3.id}`);
-    await page.waitForTimeout(2000);
-
-    // クラッシュしていない場合のみ出演者セクションを確認
-    const h1Count = await page.locator('h1').count();
-    if (h1Count > 0) {
-      // 出演者セクション配下にバッジが表示されない
-      // video-3 は actors が空なので、出演者名のスパンが無い
-      const actorsSection = page.locator(SELECTORS.actorsHeading).locator('..').locator('.flex.flex-wrap span');
-      await expect(actorsSection).toHaveCount(0);
-    } else {
-      // VideoPlayer クラッシュにより全体が描画されていない（既知のバグ）
-      expect(h1Count).toBe(0);
-    }
+    await page.waitForSelector('h1');
+    // 出演者セクション配下にバッジが表示されない
+    // video-3 は actors が空なので、出演者名のスパンが無い
+    const actorsSection = page.locator(SELECTORS.actorsHeading).locator('..').locator('.flex.flex-wrap span');
+    await expect(actorsSection).toHaveCount(0);
   });
 
   test('D-5: 外部リンクの動作', async ({ page }) => {
@@ -69,21 +59,10 @@ test.describe('D: 詳細ページ表示', () => {
   });
 
   test('D-6: 外部リンクが空の場合', async ({ page }) => {
-    // 既知のバグ: VIDEO_3 は formats が空のため VideoPlayer がクラッシュする。
     await page.goto(`/videos/${VIDEO_3.id}`);
-    await page.waitForTimeout(2000);
-
-    const h1Count = await page.locator('h1').count();
-    if (h1Count > 0) {
-      // ページが正常に描画された場合
-      const linkCount = await page.locator(SELECTORS.externalLink).count();
-      if (linkCount > 0) {
-        const href = await page.locator(SELECTORS.externalLink).getAttribute('href');
-        expect(href === '' || href === null).toBeTruthy();
-      }
-    } else {
-      // VideoPlayer クラッシュにより全体が描画されていない（既知のバグ）
-      expect(h1Count).toBe(0);
-    }
+    await page.waitForSelector('h1');
+    const link = page.locator(SELECTORS.externalLink);
+    const href = await link.getAttribute('href');
+    expect(href === '' || href === null).toBeTruthy();
   });
 });

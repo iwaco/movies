@@ -1,6 +1,6 @@
 import { test, expect, type Route } from '@playwright/test';
 import { SELECTORS } from '../helpers/selectors';
-import { VIDEO_1, TOTAL_VIDEOS_WITH_FORMAT } from '../helpers/test-data';
+import { VIDEO_1 } from '../helpers/test-data';
 
 const videosListPattern = /\/api\/v1\/videos(\?|$)/;
 
@@ -81,11 +81,12 @@ test.describe('N: ナビゲーション・ページ遷移', () => {
     // 1ページ目 → 「次へ」で2ページ目へ
     await page.goto('/');
     await page.waitForSelector(SELECTORS.searchInput);
-    await expect(page.getByText(`1 / ${TOTAL_VIDEOS_WITH_FORMAT}`)).toBeVisible();
+    const pager = page.getByRole('navigation', { name: 'ページネーション' });
+    await expect(pager.getByRole('button', { name: '1' })).toHaveAttribute('aria-current', 'page');
 
     await page.locator(SELECTORS.nextButton).click();
     await expect(page).toHaveURL(/page=2/);
-    await expect(page.getByText(`2 / ${TOTAL_VIDEOS_WITH_FORMAT}`)).toBeVisible();
+    await expect(pager.getByRole('button', { name: '2' })).toHaveAttribute('aria-current', 'page');
 
     // 2ページ目から動画詳細へ遷移
     const videoLink = page.locator('a[href^="/videos/"]').first();
@@ -95,6 +96,6 @@ test.describe('N: ナビゲーション・ページ遷移', () => {
     // ブラウザバックで一覧に戻る
     await page.goBack();
     await expect(page).toHaveURL(/page=2/);
-    await expect(page.getByText(`2 / ${TOTAL_VIDEOS_WITH_FORMAT}`)).toBeVisible();
+    await expect(pager.getByRole('button', { name: '2' })).toHaveAttribute('aria-current', 'page');
   });
 });

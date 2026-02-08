@@ -1,6 +1,5 @@
 import { test, expect, type Route } from '@playwright/test';
 import { SELECTORS } from '../helpers/selectors';
-import { TOTAL_VIDEOS_WITH_FORMAT } from '../helpers/test-data';
 import { clickTagButton } from '../helpers/tag-cloud';
 
 /** API レスポンスを per_page=1 に上書きするルートハンドラ。
@@ -53,7 +52,8 @@ test.describe('P: ページネーション', () => {
   test('P-1: ページ番号の表示', async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector(SELECTORS.searchInput);
-    await expect(page.getByText('1 / 1')).toBeVisible();
+    const pager = page.getByRole('navigation', { name: 'ページネーション' });
+    await expect(pager.getByRole('button', { name: '1' })).toHaveAttribute('aria-current', 'page');
   });
 
   test('P-2: 次ページへ遷移', async ({ page }) => {
@@ -61,11 +61,12 @@ test.describe('P: ページネーション', () => {
 
     await page.goto('/');
     await page.waitForSelector(SELECTORS.searchInput);
-    await expect(page.getByText(`1 / ${TOTAL_VIDEOS_WITH_FORMAT}`)).toBeVisible();
+    const pager = page.getByRole('navigation', { name: 'ページネーション' });
+    await expect(pager.getByRole('button', { name: '1' })).toHaveAttribute('aria-current', 'page');
 
     await page.locator(SELECTORS.nextButton).click();
     await expect(page).toHaveURL(/page=2/);
-    await expect(page.getByText(`2 / ${TOTAL_VIDEOS_WITH_FORMAT}`)).toBeVisible();
+    await expect(pager.getByRole('button', { name: '2' })).toHaveAttribute('aria-current', 'page');
   });
 
   test('P-3: 前ページへ遷移', async ({ page }) => {
@@ -73,10 +74,11 @@ test.describe('P: ページネーション', () => {
 
     await page.goto('/?page=2');
     await page.waitForSelector(SELECTORS.searchInput);
-    await expect(page.getByText(`2 / ${TOTAL_VIDEOS_WITH_FORMAT}`)).toBeVisible();
+    const pager = page.getByRole('navigation', { name: 'ページネーション' });
+    await expect(pager.getByRole('button', { name: '2' })).toHaveAttribute('aria-current', 'page');
 
     await page.locator(SELECTORS.prevButton).click();
-    await expect(page.getByText(`1 / ${TOTAL_VIDEOS_WITH_FORMAT}`)).toBeVisible();
+    await expect(pager.getByRole('button', { name: '1' })).toHaveAttribute('aria-current', 'page');
   });
 
   test('P-4: 1ページ目で「前へ」が無効', async ({ page }) => {
@@ -100,10 +102,11 @@ test.describe('P: ページネーション', () => {
 
     await page.goto('/?page=2');
     await page.waitForSelector(SELECTORS.searchInput);
-    await expect(page.getByText(`2 / ${TOTAL_VIDEOS_WITH_FORMAT}`)).toBeVisible();
+    const pager = page.getByRole('navigation', { name: 'ページネーション' });
+    await expect(pager.getByRole('button', { name: '2' })).toHaveAttribute('aria-current', 'page');
 
     // タグフィルタ適用でページリセット
     await clickTagButton(page, 'タグ1');
-    await expect(page.getByText('1 / 1')).toBeVisible();
+    await expect(pager.getByRole('button', { name: '1' })).toHaveAttribute('aria-current', 'page');
   });
 });

@@ -318,12 +318,14 @@ func TestVideoRepositoryFilterByMinRating(t *testing.T) {
 	}
 }
 
-func TestVideoRepositorySearchFTS(t *testing.T) {
+func TestVideoRepositorySearchByTitle(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 	seedTestData(t, db)
 
 	repo := NewVideoRepository(db)
+
+	// 英語タイトルの部分一致検索
 	result, err := repo.List(model.VideoQueryParams{
 		Page: 1, PerPage: 20, Sort: "date_desc", Query: "First",
 	})
@@ -332,6 +334,125 @@ func TestVideoRepositorySearchFTS(t *testing.T) {
 	}
 	if result.Total != 1 {
 		t.Errorf("expected 1 result for 'First', got %d", result.Total)
+	}
+}
+
+func TestVideoRepositorySearchByActorName(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+	seedTestData(t, db)
+
+	repo := NewVideoRepository(db)
+
+	// Actor A は vid1, vid3 に関連
+	result, err := repo.List(model.VideoQueryParams{
+		Page: 1, PerPage: 20, Sort: "date_desc", Query: "Actor A",
+	})
+	if err != nil {
+		t.Fatalf("failed: %v", err)
+	}
+	if result.Total != 2 {
+		t.Errorf("expected 2 results for 'Actor A', got %d", result.Total)
+	}
+
+	// Actor C は vid2 のみ
+	result, err = repo.List(model.VideoQueryParams{
+		Page: 1, PerPage: 20, Sort: "date_desc", Query: "Actor C",
+	})
+	if err != nil {
+		t.Fatalf("failed: %v", err)
+	}
+	if result.Total != 1 {
+		t.Errorf("expected 1 result for 'Actor C', got %d", result.Total)
+	}
+	if result.Data[0].ID != "vid2" {
+		t.Errorf("expected vid2, got %s", result.Data[0].ID)
+	}
+}
+
+func TestVideoRepositorySearchByTagName(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+	seedTestData(t, db)
+
+	repo := NewVideoRepository(db)
+
+	// tag1 は vid1 のみ
+	result, err := repo.List(model.VideoQueryParams{
+		Page: 1, PerPage: 20, Sort: "date_desc", Query: "tag1",
+	})
+	if err != nil {
+		t.Fatalf("failed: %v", err)
+	}
+	if result.Total != 1 {
+		t.Errorf("expected 1 result for 'tag1', got %d", result.Total)
+	}
+	if result.Data[0].ID != "vid1" {
+		t.Errorf("expected vid1, got %s", result.Data[0].ID)
+	}
+
+	// tag3 は vid2, vid3 に関連
+	result, err = repo.List(model.VideoQueryParams{
+		Page: 1, PerPage: 20, Sort: "date_desc", Query: "tag3",
+	})
+	if err != nil {
+		t.Fatalf("failed: %v", err)
+	}
+	if result.Total != 2 {
+		t.Errorf("expected 2 results for 'tag3', got %d", result.Total)
+	}
+}
+
+func TestVideoRepositorySearchJapaneseTitle(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+	seedTestData(t, db)
+
+	// 日本語タイトルのテストデータを追加
+	queries := []string{
+		`INSERT INTO videos (id, title, url, date, jpg, pictures_dir) VALUES
+			('vid4', '揺れるボヨヨンHカップ', 'https://example.com/4', '2024-04-01', '/thumb4.jpg', '/pics/vid4/'),
+			('vid5', '美人OLの秘密の休日', 'https://example.com/5', '2024-05-01', '/thumb5.jpg', '/pics/vid5/')`,
+	}
+	for _, q := range queries {
+		if _, err := db.Exec(q); err != nil {
+			t.Fatalf("failed to seed Japanese data: %v", err)
+		}
+	}
+
+	repo := NewVideoRepository(db)
+
+	tests := []struct {
+		name        string
+		query       string
+		expectedIDs []string
+	}{
+		{"タイトル先頭の文字列で検索", "揺れる", []string{"vid4"}},
+		{"タイトル途中の文字列で検索", "ボヨヨン", []string{"vid4"}},
+		{"タイトル末尾の文字列で検索", "Hカップ", []string{"vid4"}},
+		{"別の日本語タイトルで検索", "秘密", []string{"vid5"}},
+		{"ヒットしないクエリ", "存在しない", nil},
+		{"ワイルドカード%はリテラル扱い", "%", nil},
+		{"ワイルドカード_はリテラル扱い", "_", nil},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := repo.List(model.VideoQueryParams{
+				Page: 1, PerPage: 20, Sort: "date_desc", Query: tt.query,
+			})
+			if err != nil {
+				t.Fatalf("failed to search '%s': %v", tt.query, err)
+			}
+			if result.Total != len(tt.expectedIDs) {
+				t.Errorf("query '%s': expected %d results, got %d", tt.query, len(tt.expectedIDs), result.Total)
+			}
+			for i, expectedID := range tt.expectedIDs {
+				if i < len(result.Data) && result.Data[i].ID != expectedID {
+					t.Errorf("query '%s': expected result[%d] ID=%s, got %s", tt.query, i, expectedID, result.Data[i].ID)
+				}
+			}
+		})
 	}
 }
 

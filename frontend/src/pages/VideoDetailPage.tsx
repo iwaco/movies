@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { fetchVideo } from '../api/client'
 import { VideoPlayer } from '../components/VideoPlayer'
 import { ImageGallery } from '../components/ImageGallery'
-import { FavoriteButton } from '../components/FavoriteButton'
+import { StarRating } from '../components/StarRating'
 
 export function VideoDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -24,7 +24,7 @@ export function VideoDetailPage() {
       <div className="mb-4">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{video.title}</h1>
-          <FavoriteButton videoId={video.id} isFavorite={video.is_favorite} />
+          <StarRating videoId={video.id} rating={video.rating} />
         </div>
         <p className="text-gray-600 dark:text-gray-400 mt-1">{video.date}</p>
         <a

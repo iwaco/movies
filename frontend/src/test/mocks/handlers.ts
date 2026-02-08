@@ -15,7 +15,7 @@ export const mockVideos: Video[] = [
       { id: 1, name: '720p', file_path: '/videos/video1/720p.mp4' },
       { id: 2, name: '1080p', file_path: '/videos/video1/1080p.mp4' },
     ],
-    is_favorite: false,
+    rating: 0,
     created_at: '2024-01-15T00:00:00Z',
     updated_at: '2024-01-15T00:00:00Z',
   },
@@ -31,7 +31,7 @@ export const mockVideos: Video[] = [
     formats: [
       { id: 3, name: '720p', file_path: '/videos/video2/720p.mp4' },
     ],
-    is_favorite: true,
+    rating: 4,
     created_at: '2024-02-20T00:00:00Z',
     updated_at: '2024-02-20T00:00:00Z',
   },
@@ -45,7 +45,7 @@ export const mockVideos: Video[] = [
     actors: [{ id: 1, name: 'Actor A' }],
     tags: [{ id: 3, name: 'Tag3' }],
     formats: [],
-    is_favorite: false,
+    rating: 0,
     created_at: '2024-03-10T00:00:00Z',
     updated_at: '2024-03-10T00:00:00Z',
   },
@@ -72,6 +72,7 @@ export const handlers = [
     const tags = url.searchParams.getAll('tag')
     const actors = url.searchParams.getAll('actor')
     const hasVideo = url.searchParams.get('has_video')
+    const minRating = Number(url.searchParams.get('min_rating') || '0')
 
     let filtered = [...mockVideos]
     if (hasVideo === 'true') {
@@ -91,6 +92,9 @@ export const handlers = [
       filtered = filtered.filter((v) =>
         actors.every((actor) => v.actors.some((a) => a.name === actor))
       )
+    }
+    if (minRating > 0) {
+      filtered = filtered.filter((v) => v.rating >= minRating)
     }
 
     const response: PaginatedResponse<Video> = {
@@ -120,23 +124,11 @@ export const handlers = [
     return HttpResponse.json({ pictures: [] })
   }),
 
-  http.get('/api/v1/favorites', () => {
-    const favorites = mockVideos.filter((v) => v.is_favorite)
-    const response: PaginatedResponse<Video> = {
-      data: favorites,
-      total: favorites.length,
-      page: 1,
-      per_page: 20,
-      total_pages: 1,
-    }
-    return HttpResponse.json(response)
+  http.put('/api/v1/ratings/:videoId', () => {
+    return new HttpResponse(null, { status: 200 })
   }),
 
-  http.post('/api/v1/favorites', () => {
-    return HttpResponse.json(null, { status: 201 })
-  }),
-
-  http.delete('/api/v1/favorites/:videoId', () => {
+  http.delete('/api/v1/ratings/:videoId', () => {
     return new HttpResponse(null, { status: 204 })
   }),
 

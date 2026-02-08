@@ -7,6 +7,7 @@ export interface FetchVideosParams {
   tags?: string[];
   actors?: string[];
   has_video?: boolean;
+  min_rating?: number;
 }
 
 export async function fetchVideos(params: FetchVideosParams = {}): Promise<PaginatedResponse<Video>> {
@@ -26,6 +27,7 @@ export async function fetchVideos(params: FetchVideosParams = {}): Promise<Pagin
   }
   if (params.has_video === true) searchParams.set('has_video', 'true')
   if (params.has_video === false) searchParams.set('has_video', 'false')
+  if (params.min_rating) searchParams.set('min_rating', String(params.min_rating))
 
   const res = await fetch(`/api/v1/videos?${searchParams.toString()}`)
   if (!res.ok) throw new Error('Failed to fetch videos')
@@ -45,26 +47,20 @@ export async function fetchVideoPictures(id: string): Promise<string[]> {
   return data.pictures ?? []
 }
 
-export async function fetchFavorites(): Promise<PaginatedResponse<Video>> {
-  const res = await fetch('/api/v1/favorites')
-  if (!res.ok) throw new Error('Failed to fetch favorites')
-  return res.json()
-}
-
-export async function addFavorite(videoId: string): Promise<void> {
-  const res = await fetch('/api/v1/favorites', {
-    method: 'POST',
+export async function setRating(videoId: string, rating: number): Promise<void> {
+  const res = await fetch(`/api/v1/ratings/${videoId}`, {
+    method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ video_id: videoId }),
+    body: JSON.stringify({ rating }),
   })
-  if (!res.ok) throw new Error('Failed to add favorite')
+  if (!res.ok) throw new Error('Failed to set rating')
 }
 
-export async function removeFavorite(videoId: string): Promise<void> {
-  const res = await fetch(`/api/v1/favorites/${videoId}`, {
+export async function removeRating(videoId: string): Promise<void> {
+  const res = await fetch(`/api/v1/ratings/${videoId}`, {
     method: 'DELETE',
   })
-  if (!res.ok) throw new Error('Failed to remove favorite')
+  if (!res.ok) throw new Error('Failed to remove rating')
 }
 
 export async function fetchTags(): Promise<Tag[]> {

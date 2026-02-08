@@ -17,6 +17,7 @@ spec:
       labels:
         app: movies
     spec:
+      enableServiceLinks: false
       terminationGracePeriodSeconds: 30
       securityContext:
         runAsNonRoot: true

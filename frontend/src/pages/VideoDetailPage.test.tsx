@@ -87,4 +87,20 @@ describe('VideoDetailPage', () => {
     const video = document.querySelector('video')
     expect(video).not.toBeInTheDocument()
   })
+
+  it('renders tags as clickable links to filtered list', async () => {
+    renderWithProviders('video-1')
+    await waitFor(() => {
+      const tagLink = screen.getByRole('link', { name: 'Tag1' })
+      expect(tagLink).toHaveAttribute('href', '/?tag=Tag1')
+    })
+  })
+
+  it('renders actors as clickable links to filtered list', async () => {
+    renderWithProviders('video-1')
+    await waitFor(() => {
+      const actorLink = screen.getByRole('link', { name: 'Actor A' })
+      expect(actorLink).toHaveAttribute('href', '/?actor=Actor%20A')
+    })
+  })
 })

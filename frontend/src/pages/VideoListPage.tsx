@@ -10,14 +10,16 @@ export function VideoListPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const page = Number(searchParams.get('page') || '1')
   const q = searchParams.get('q') || ''
-  const tag = searchParams.get('tag') || ''
-  const actor = searchParams.get('actor') || ''
+  const tags = searchParams.getAll('tag')
+  const actors = searchParams.getAll('actor')
   const hasVideo = searchParams.get('has_video') !== 'false'
 
   const { data } = useQuery({
-    queryKey: ['videos', page, q, tag, actor, hasVideo],
-    queryFn: () => fetchVideos({ page, q, tag, actor, has_video: hasVideo }),
+    queryKey: ['videos', page, q, tags, actors, hasVideo],
+    queryFn: () => fetchVideos({ page, q, tags, actors, has_video: hasVideo }),
   })
+
+  const videos = data?.data ?? []
 
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams)
@@ -33,11 +35,17 @@ export function VideoListPage() {
       <div className="mb-4">
         <FilterPanel />
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {data?.data.map((video) => (
-          <VideoCard key={video.id} video={video} />
-        ))}
-      </div>
+      {data && videos.length === 0 ? (
+        <div className="text-center py-16 text-gray-500 dark:text-gray-400">
+          条件に一致する動画が見つかりませんでした
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {videos.map((video) => (
+            <VideoCard key={video.id} video={video} />
+          ))}
+        </div>
+      )}
       {data && (
         <Pagination
           page={data.page}

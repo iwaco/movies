@@ -4,9 +4,9 @@ export const SELECTORS = {
   // 検索
   searchInput: 'input[placeholder="検索..."]',
 
-  // フィルタ
-  tagFilter: '#tag-filter',
-  actorFilter: '#actor-filter',
+  // フィルタ（タグクラウド）
+  tagCloudHeader: '[data-testid="accordion-header"]:has-text("タグ")',
+  actorCloudHeader: '[data-testid="accordion-header"]:has-text("出演者")',
   hasVideoFilter: '#has-video-filter',
 
   // ページネーション

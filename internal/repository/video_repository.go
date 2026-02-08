@@ -26,14 +26,14 @@ func (r *VideoRepository) List(params model.VideoQueryParams) (*model.VideoListR
 		args = append(args, params.Query+"*")
 		argIdx++
 	}
-	if params.Tag != "" {
+	for _, tag := range params.Tags {
 		where = append(where, fmt.Sprintf("v.id IN (SELECT vt.video_id FROM video_tags vt JOIN tags t ON t.id = vt.tag_id WHERE t.name = $%d)", argIdx))
-		args = append(args, params.Tag)
+		args = append(args, tag)
 		argIdx++
 	}
-	if params.Actor != "" {
+	for _, actor := range params.Actors {
 		where = append(where, fmt.Sprintf("v.id IN (SELECT va.video_id FROM video_actors va JOIN actors a ON a.id = va.actor_id WHERE a.name = $%d)", argIdx))
-		args = append(args, params.Actor)
+		args = append(args, actor)
 		argIdx++
 	}
 	if params.DateFrom != "" {

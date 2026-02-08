@@ -37,8 +37,8 @@ type VideoQueryParams struct {
 	Page     int
 	PerPage  int
 	Query    string
-	Tag      string
-	Actor    string
+	Tags     []string
+	Actors   []string
 	DateFrom string
 	DateTo   string
 	Sort     string

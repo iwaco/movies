@@ -150,7 +150,7 @@ func TestVideoRepositoryFilterByTag(t *testing.T) {
 	seedTestData(t, db)
 
 	repo := NewVideoRepository(db)
-	result, err := repo.List(model.VideoQueryParams{Page: 1, PerPage: 20, Sort: "date_desc", Tag: "tag1"})
+	result, err := repo.List(model.VideoQueryParams{Page: 1, PerPage: 20, Sort: "date_desc", Tags: []string{"tag1"}})
 	if err != nil {
 		t.Fatalf("failed: %v", err)
 	}
@@ -162,13 +162,54 @@ func TestVideoRepositoryFilterByTag(t *testing.T) {
 	}
 }
 
+func TestVideoRepositoryFilterByMultipleTags(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+	seedTestData(t, db)
+
+	repo := NewVideoRepository(db)
+
+	// vid1 has tag1,tag2. vid2 has tag2,tag3. AND filter: tag1 AND tag2 -> only vid1
+	result, err := repo.List(model.VideoQueryParams{Page: 1, PerPage: 20, Sort: "date_desc", Tags: []string{"tag1", "tag2"}})
+	if err != nil {
+		t.Fatalf("failed: %v", err)
+	}
+	if result.Total != 1 {
+		t.Errorf("expected 1 video with tag1 AND tag2, got %d", result.Total)
+	}
+	if len(result.Data) > 0 && result.Data[0].ID != "vid1" {
+		t.Errorf("expected vid1, got %s", result.Data[0].ID)
+	}
+
+	// AND filter: tag2 AND tag3 -> only vid2
+	result, err = repo.List(model.VideoQueryParams{Page: 1, PerPage: 20, Sort: "date_desc", Tags: []string{"tag2", "tag3"}})
+	if err != nil {
+		t.Fatalf("failed: %v", err)
+	}
+	if result.Total != 1 {
+		t.Errorf("expected 1 video with tag2 AND tag3, got %d", result.Total)
+	}
+	if len(result.Data) > 0 && result.Data[0].ID != "vid2" {
+		t.Errorf("expected vid2, got %s", result.Data[0].ID)
+	}
+
+	// AND filter: tag1 AND tag3 -> no videos (no video has both)
+	result, err = repo.List(model.VideoQueryParams{Page: 1, PerPage: 20, Sort: "date_desc", Tags: []string{"tag1", "tag3"}})
+	if err != nil {
+		t.Fatalf("failed: %v", err)
+	}
+	if result.Total != 0 {
+		t.Errorf("expected 0 videos with tag1 AND tag3, got %d", result.Total)
+	}
+}
+
 func TestVideoRepositoryFilterByActor(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 	seedTestData(t, db)
 
 	repo := NewVideoRepository(db)
-	result, err := repo.List(model.VideoQueryParams{Page: 1, PerPage: 20, Sort: "date_desc", Actor: "Actor C"})
+	result, err := repo.List(model.VideoQueryParams{Page: 1, PerPage: 20, Sort: "date_desc", Actors: []string{"Actor C"}})
 	if err != nil {
 		t.Fatalf("failed: %v", err)
 	}
@@ -177,6 +218,65 @@ func TestVideoRepositoryFilterByActor(t *testing.T) {
 	}
 	if result.Data[0].ID != "vid2" {
 		t.Errorf("expected vid2, got %s", result.Data[0].ID)
+	}
+}
+
+func TestVideoRepositoryFilterByMultipleActors(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+	seedTestData(t, db)
+
+	repo := NewVideoRepository(db)
+
+	// vid1 has Actor A, Actor B. vid2 has Actor B, Actor C. AND filter: Actor A AND Actor B -> only vid1
+	result, err := repo.List(model.VideoQueryParams{Page: 1, PerPage: 20, Sort: "date_desc", Actors: []string{"Actor A", "Actor B"}})
+	if err != nil {
+		t.Fatalf("failed: %v", err)
+	}
+	if result.Total != 1 {
+		t.Errorf("expected 1 video with Actor A AND Actor B, got %d", result.Total)
+	}
+	if len(result.Data) > 0 && result.Data[0].ID != "vid1" {
+		t.Errorf("expected vid1, got %s", result.Data[0].ID)
+	}
+
+	// AND filter: Actor A AND Actor C -> no videos
+	result, err = repo.List(model.VideoQueryParams{Page: 1, PerPage: 20, Sort: "date_desc", Actors: []string{"Actor A", "Actor C"}})
+	if err != nil {
+		t.Fatalf("failed: %v", err)
+	}
+	if result.Total != 0 {
+		t.Errorf("expected 0 videos with Actor A AND Actor C, got %d", result.Total)
+	}
+}
+
+func TestVideoRepositoryFilterByTagsAndActors(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+	seedTestData(t, db)
+
+	repo := NewVideoRepository(db)
+
+	// vid1 has tag1,tag2 and Actor A, Actor B
+	// Filter: tag2 AND Actor B -> vid1 and vid2 both have tag2 and Actor B
+	result, err := repo.List(model.VideoQueryParams{Page: 1, PerPage: 20, Sort: "date_desc", Tags: []string{"tag2"}, Actors: []string{"Actor B"}})
+	if err != nil {
+		t.Fatalf("failed: %v", err)
+	}
+	if result.Total != 2 {
+		t.Errorf("expected 2 videos with tag2 AND Actor B, got %d", result.Total)
+	}
+
+	// Filter: tag1 AND Actor A -> only vid1
+	result, err = repo.List(model.VideoQueryParams{Page: 1, PerPage: 20, Sort: "date_desc", Tags: []string{"tag1"}, Actors: []string{"Actor A"}})
+	if err != nil {
+		t.Fatalf("failed: %v", err)
+	}
+	if result.Total != 1 {
+		t.Errorf("expected 1 video with tag1 AND Actor A, got %d", result.Total)
+	}
+	if len(result.Data) > 0 && result.Data[0].ID != "vid1" {
+		t.Errorf("expected vid1, got %s", result.Data[0].ID)
 	}
 }
 

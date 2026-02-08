@@ -4,8 +4,8 @@ export interface FetchVideosParams {
   page?: number;
   per_page?: number;
   q?: string;
-  tag?: string;
-  actor?: string;
+  tags?: string[];
+  actors?: string[];
   has_video?: boolean;
 }
 
@@ -14,8 +14,16 @@ export async function fetchVideos(params: FetchVideosParams = {}): Promise<Pagin
   if (params.page) searchParams.set('page', String(params.page))
   if (params.per_page) searchParams.set('per_page', String(params.per_page))
   if (params.q) searchParams.set('q', params.q)
-  if (params.tag) searchParams.set('tag', params.tag)
-  if (params.actor) searchParams.set('actor', params.actor)
+  if (params.tags) {
+    for (const tag of params.tags) {
+      searchParams.append('tag', tag)
+    }
+  }
+  if (params.actors) {
+    for (const actor of params.actors) {
+      searchParams.append('actor', actor)
+    }
+  }
   if (params.has_video === true) searchParams.set('has_video', 'true')
   if (params.has_video === false) searchParams.set('has_video', 'false')
 

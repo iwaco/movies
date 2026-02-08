@@ -9,19 +9,21 @@ export function SearchBar() {
   useEffect(() => {
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
-      const params = new URLSearchParams(searchParams)
-      if (value) {
-        params.set('q', value)
-      } else {
-        params.delete('q')
-      }
-      params.delete('page')
-      setSearchParams(params)
+      setSearchParams((prev) => {
+        const params = new URLSearchParams(prev)
+        if (value) {
+          params.set('q', value)
+        } else {
+          params.delete('q')
+        }
+        params.delete('page')
+        return params
+      })
     }, 300)
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
-  }, [value])
+  }, [value, setSearchParams])
 
   return (
     <input

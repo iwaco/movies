@@ -14,15 +14,15 @@ test.describe('V: 動画プレイヤー', () => {
   test('V-2: デフォルト画質の選択', async ({ page }) => {
     await page.goto(`/videos/${VIDEO_1.id}`);
     await page.waitForSelector('h1');
-    const select = page.locator(SELECTORS.formatSelect);
-    await expect(select).toHaveValue(VIDEO_1.formats[0]);
+    const selectedOption = page.locator(`${SELECTORS.formatSelect} option:checked`);
+    await expect(selectedOption).toHaveText(VIDEO_1.formats[0]);
   });
 
   test('V-3: 画質切替', async ({ page }) => {
     await page.goto(`/videos/${VIDEO_1.id}`);
     await page.waitForSelector('h1');
-    // 別の画質を選択
-    await page.selectOption(SELECTORS.formatSelect, VIDEO_1.formats[1]);
+    // 別の画質をラベルで選択
+    await page.selectOption(SELECTORS.formatSelect, { label: VIDEO_1.formats[1] });
 
     // video の source src が更新される
     const source = page.locator(`${SELECTORS.videoElement} source`);
@@ -41,7 +41,7 @@ test.describe('V: 動画プレイヤー', () => {
     await page.waitForSelector('h1');
     const options = page.locator(`${SELECTORS.formatSelect} option`);
     await expect(options).toHaveCount(1);
-    await expect(page.locator(SELECTORS.formatSelect)).toHaveValue('720p');
+    await expect(page.locator(`${SELECTORS.formatSelect} option:checked`)).toHaveText('720p');
   });
 
   test('V-6: 画質なし（空 formats）の場合', async ({ page }) => {

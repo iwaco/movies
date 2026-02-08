@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { VideoFormat } from '../types/video'
 
 interface VideoPlayerProps {
@@ -6,11 +6,11 @@ interface VideoPlayerProps {
 }
 
 export function VideoPlayer({ formats }: VideoPlayerProps) {
-  const [selectedFormat, setSelectedFormat] = useState<VideoFormat | null>(formats[0] ?? null)
+  const [selectedFormatId, setSelectedFormatId] = useState<number | null>(formats[0]?.id ?? null)
 
-  useEffect(() => {
-    setSelectedFormat(formats[0] ?? null)
-  }, [formats])
+  const selectedFormat = useMemo(() => {
+    return formats.find((f) => f.id === selectedFormatId) ?? formats[0] ?? null
+  }, [formats, selectedFormatId])
 
   if (formats.length === 0 || !selectedFormat) return null
 
@@ -21,10 +21,7 @@ export function VideoPlayer({ formats }: VideoPlayerProps) {
         <select
           id="format-select"
           value={selectedFormat.id}
-          onChange={(e) => {
-            const format = formats.find((f) => f.id === Number(e.target.value))
-            if (format) setSelectedFormat(format)
-          }}
+          onChange={(e) => setSelectedFormatId(Number(e.target.value))}
           className="px-3 py-1.5 rounded-lg bg-white/60 dark:bg-white/10 backdrop-blur-md border border-white/30 dark:border-white/15 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-rose-500/50 transition-all duration-200 cursor-pointer"
         >
           {formats.map((format) => (

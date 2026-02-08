@@ -477,3 +477,46 @@ func TestListVideosWithQueryParams(t *testing.T) {
 		t.Errorf("expected 1 video with tag1, got %v", result["total"])
 	}
 }
+
+func TestListVideosWithMultipleTags(t *testing.T) {
+	r, db := setupTestRouter(t)
+	defer db.Close()
+
+	// Seed data with overlapping tags
+	queries := []string{
+		`INSERT INTO videos (id, title, url, date, jpg, pictures_dir) VALUES
+			('vid1', 'First Video', 'https://example.com/1', '2024-01-15', '/thumb1.jpg', '/pics/vid1/'),
+			('vid2', 'Second Video', 'https://example.com/2', '2024-02-20', '/thumb2.jpg', '/pics/vid2/')`,
+		`INSERT INTO tags (name) VALUES ('tagA'), ('tagB'), ('tagC')`,
+		`INSERT INTO video_tags (video_id, tag_id) VALUES ('vid1', 1), ('vid1', 2), ('vid2', 2), ('vid2', 3)`,
+		`INSERT INTO videos_fts (video_id, title, actors, tags) VALUES
+			('vid1', 'First Video', '', 'tagA,tagB'),
+			('vid2', 'Second Video', '', 'tagB,tagC')`,
+	}
+	for _, q := range queries {
+		if _, err := db.Exec(q); err != nil {
+			t.Fatalf("failed to seed: %v\nquery: %s", err, q)
+		}
+	}
+
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+
+	// Multiple tags: tagA AND tagB -> only vid1
+	resp, err := http.Get(ts.URL + "/api/v1/videos?tag=tagA&tag=tagB")
+	if err != nil {
+		t.Fatalf("failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("expected 200, got %d", resp.StatusCode)
+	}
+
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+
+	if result["total"].(float64) != 1 {
+		t.Errorf("expected 1 video with tagA AND tagB, got %v", result["total"])
+	}
+}

@@ -17,44 +17,47 @@ function renderWithProviders(ui: React.ReactElement) {
 }
 
 describe('FilterPanel', () => {
-  it('renders tag filter options from API', async () => {
+  it('renders tag items from API as tag cloud buttons', async () => {
     renderWithProviders(<FilterPanel />)
     await waitFor(() => {
-      expect(screen.getByText('Tag1')).toBeInTheDocument()
-      expect(screen.getByText('Tag2')).toBeInTheDocument()
-      expect(screen.getByText('Tag3')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Tag1' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Tag2' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Tag3' })).toBeInTheDocument()
     })
   })
 
-  it('renders actor filter options from API', async () => {
+  it('renders actor items from API as tag cloud buttons', async () => {
     renderWithProviders(<FilterPanel />)
     await waitFor(() => {
-      expect(screen.getByText('Actor A')).toBeInTheDocument()
-      expect(screen.getByText('Actor B')).toBeInTheDocument()
-      expect(screen.getByText('Actor C')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Actor A' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Actor B' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Actor C' })).toBeInTheDocument()
     })
   })
 
-  it('allows selecting a tag filter', async () => {
+  it('allows toggling a tag selection', async () => {
     const user = userEvent.setup()
     renderWithProviders(<FilterPanel />)
     await waitFor(() => {
-      expect(screen.getByText('Tag1')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Tag1' })).toBeInTheDocument()
     })
-    const tagSelect = screen.getByLabelText('タグ')
-    await user.selectOptions(tagSelect, 'Tag1')
-    expect(tagSelect).toHaveValue('Tag1')
+    await user.click(screen.getByRole('button', { name: 'Tag1' }))
+    // After clicking, the button should have selected style
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Tag1' }).className).toMatch(/bg-rose-500/)
+    })
   })
 
-  it('allows selecting an actor filter', async () => {
+  it('allows toggling an actor selection', async () => {
     const user = userEvent.setup()
     renderWithProviders(<FilterPanel />)
     await waitFor(() => {
-      expect(screen.getByText('Actor A')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Actor A' })).toBeInTheDocument()
     })
-    const actorSelect = screen.getByLabelText('出演者')
-    await user.selectOptions(actorSelect, 'Actor A')
-    expect(actorSelect).toHaveValue('Actor A')
+    await user.click(screen.getByRole('button', { name: 'Actor A' }))
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Actor A' }).className).toMatch(/bg-rose-500/)
+    })
   })
 
   it('renders has-video checkbox checked by default', () => {

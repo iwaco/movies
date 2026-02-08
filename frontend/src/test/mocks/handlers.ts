@@ -69,8 +69,8 @@ export const handlers = [
     const page = Number(url.searchParams.get('page') || '1')
     const perPage = Number(url.searchParams.get('per_page') || '20')
     const q = url.searchParams.get('q') || ''
-    const tag = url.searchParams.get('tag') || ''
-    const actor = url.searchParams.get('actor') || ''
+    const tags = url.searchParams.getAll('tag')
+    const actors = url.searchParams.getAll('actor')
     const hasVideo = url.searchParams.get('has_video')
 
     let filtered = [...mockVideos]
@@ -82,14 +82,14 @@ export const handlers = [
         v.title.toLowerCase().includes(q.toLowerCase())
       )
     }
-    if (tag) {
+    if (tags.length > 0) {
       filtered = filtered.filter((v) =>
-        v.tags.some((t) => t.name === tag)
+        tags.every((tag) => v.tags.some((t) => t.name === tag))
       )
     }
-    if (actor) {
+    if (actors.length > 0) {
       filtered = filtered.filter((v) =>
-        v.actors.some((a) => a.name === actor)
+        actors.every((actor) => v.actors.some((a) => a.name === actor))
       )
     }
 

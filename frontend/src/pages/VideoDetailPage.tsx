@@ -1,4 +1,4 @@
-import { useParams } from 'react-router'
+import { useParams, Link } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
 import { fetchVideo } from '../api/client'
 import { VideoPlayer } from '../components/VideoPlayer'
@@ -40,9 +40,13 @@ export function VideoDetailPage() {
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">出演者</h2>
         <div className="flex flex-wrap gap-2">
           {video.actors.map((actor) => (
-            <span key={actor.id} className="bg-white/50 dark:bg-white/10 backdrop-blur-sm rounded-lg px-3 py-1 text-gray-800 dark:text-gray-200">
+            <Link
+              key={actor.id}
+              to={`/?actor=${encodeURIComponent(actor.name)}`}
+              className="bg-white/50 dark:bg-white/10 backdrop-blur-sm rounded-lg px-3 py-1 text-gray-800 dark:text-gray-200 hover:bg-rose-500/80 hover:text-white transition-colors duration-200"
+            >
               {actor.name}
-            </span>
+            </Link>
           ))}
         </div>
       </div>
@@ -50,9 +54,13 @@ export function VideoDetailPage() {
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">タグ</h2>
         <div className="flex flex-wrap gap-2">
           {video.tags.map((tag) => (
-            <span key={tag.id} className="bg-white/50 dark:bg-white/10 backdrop-blur-sm rounded-lg px-3 py-1 text-sm text-gray-700 dark:text-gray-300">
+            <Link
+              key={tag.id}
+              to={`/?tag=${encodeURIComponent(tag.name)}`}
+              className="bg-white/50 dark:bg-white/10 backdrop-blur-sm rounded-lg px-3 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-rose-500/80 hover:text-white transition-colors duration-200"
+            >
               {tag.name}
-            </span>
+            </Link>
           ))}
         </div>
       </div>

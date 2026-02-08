@@ -42,9 +42,9 @@ test.describe('D: 詳細ページ表示', () => {
   test('D-4: 出演者が0人の場合', async ({ page }) => {
     await page.goto(`/videos/${VIDEO_3.id}`);
     await page.waitForSelector('h1');
-    // 出演者セクション配下にバッジが表示されない
-    // video-3 は actors が空なので、出演者名のスパンが無い
-    const actorsSection = page.locator(SELECTORS.actorsHeading).locator('..').locator('.flex.flex-wrap span');
+    // 出演者セクション配下にリンクが表示されない
+    // video-3 は actors が空なので、出演者のリンクが無い
+    const actorsSection = page.locator(SELECTORS.actorsHeading).locator('..').locator('.flex.flex-wrap a');
     await expect(actorsSection).toHaveCount(0);
   });
 
@@ -64,5 +64,30 @@ test.describe('D: 詳細ページ表示', () => {
     const link = page.locator(SELECTORS.externalLink);
     const href = await link.getAttribute('href');
     expect(href === '' || href === null).toBeTruthy();
+  });
+
+  test('D-7: タグクリックで一覧ページにフィルタ遷移', async ({ page }) => {
+    await page.goto(`/videos/${VIDEO_1.id}`);
+    await page.waitForSelector('h1');
+    // タグセクション内のタグ1リンクをクリック
+    const tagsSection = page.locator(SELECTORS.tagsHeading).locator('..');
+    await tagsSection.getByRole('link', { name: VIDEO_1.tags[0], exact: true }).click();
+    // 一覧ページに遷移し、タグパラメータが URL に含まれている
+    await expect(page).toHaveURL(/tag=/);
+    await expect(page.locator(SELECTORS.searchInput)).toBeVisible();
+    // フィルタ結果にvideo-1が表示される
+    await expect(page.locator(`a[href="/videos/${VIDEO_1.id}"]`).first()).toBeVisible();
+  });
+
+  test('D-8: 出演者クリックで一覧ページにフィルタ遷移', async ({ page }) => {
+    await page.goto(`/videos/${VIDEO_1.id}`);
+    await page.waitForSelector('h1');
+    // 出演者セクション内の出演者Aリンクをクリック
+    const actorsSection = page.locator(SELECTORS.actorsHeading).locator('..');
+    await actorsSection.getByRole('link', { name: VIDEO_1.actors[0], exact: true }).click();
+    // 一覧ページに遷移し、出演者パラメータが URL に含まれている
+    await expect(page).toHaveURL(/actor=/);
+    await expect(page.locator(SELECTORS.searchInput)).toBeVisible();
+    await expect(page.locator(`a[href="/videos/${VIDEO_1.id}"]`).first()).toBeVisible();
   });
 });

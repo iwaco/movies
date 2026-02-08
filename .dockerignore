@@ -1,0 +1,13 @@
+.git
+.github
+*.db
+bin/
+media/
+e2e/
+frontend/node_modules/
+frontend/dist/
+*.md
+.env
+.dockerignore
+Dockerfile
+Makefile

@@ -7,15 +7,17 @@ export const SELECTORS = {
   // フィルタ（タグクラウド）
   tagCloudHeader: '[data-testid="accordion-header"]:has-text("タグ")',
   actorCloudHeader: '[data-testid="accordion-header"]:has-text("出演者")',
-  hasVideoFilter: '#has-video-filter',
+  cloudToggle: 'button[aria-label="動画のみ表示中"], button[aria-label="全て表示中"]',
+
+  // 星フィルタ
+  starFilter: '[role="group"][aria-label="星フィルタ"]',
+
+  // 星評価
+  starRating: '[role="group"][aria-label="評価"]',
 
   // ページネーション
   prevButton: 'button:has-text("前へ")',
   nextButton: 'button:has-text("次へ")',
-
-  // お気に入り
-  favoriteAdd: 'button[aria-label="お気に入りに追加"]',
-  favoriteRemove: 'button[aria-label="お気に入りから削除"]',
 
   // テーマ
   darkModeToggle: 'button[aria-label="ダークモードに切替"]',

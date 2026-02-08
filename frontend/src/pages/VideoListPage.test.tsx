@@ -32,7 +32,8 @@ describe('VideoListPage', () => {
   it('renders pagination', async () => {
     renderWithProviders(<VideoListPage />)
     await waitFor(() => {
-      expect(screen.getByText('1 / 1')).toBeInTheDocument()
+      const pageButton = screen.getByRole('button', { name: '1' })
+      expect(pageButton).toHaveAttribute('aria-current', 'page')
     })
   })
 

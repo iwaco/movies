@@ -78,4 +78,13 @@ describe('VideoDetailPage', () => {
     })
     expect(screen.queryByText('画像')).not.toBeInTheDocument()
   })
+
+  it('renders page without VideoPlayer when formats is empty', async () => {
+    renderWithProviders('video-3')
+    await waitFor(() => {
+      expect(screen.getByText('Test Video 3 No Format')).toBeInTheDocument()
+    })
+    const video = document.querySelector('video')
+    expect(video).not.toBeInTheDocument()
+  })
 })

@@ -39,7 +39,7 @@ func TestNewRouter(t *testing.T) {
 		{"GET", "/api/v1/videos", http.StatusOK},
 		{"GET", "/api/v1/tags", http.StatusOK},
 		{"GET", "/api/v1/actors", http.StatusOK},
-		{"GET", "/api/v1/favorites", http.StatusOK},
+		{"DELETE", "/api/v1/ratings/nonexistent", http.StatusNoContent},
 	}
 
 	for _, rt := range routes {

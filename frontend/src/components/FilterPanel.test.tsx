@@ -60,19 +60,33 @@ describe('FilterPanel', () => {
     })
   })
 
-  it('renders has-video checkbox checked by default', () => {
+  it('renders cloud toggle button with default state', () => {
     renderWithProviders(<FilterPanel />)
-    const checkbox = screen.getByLabelText('動画のみ')
-    expect(checkbox).toBeInTheDocument()
-    expect(checkbox).toBeChecked()
+    const cloudButton = screen.getByRole('button', { name: '動画のみ表示中' })
+    expect(cloudButton).toBeInTheDocument()
   })
 
-  it('allows toggling has-video filter off', async () => {
+  it('toggles cloud button to show all', async () => {
     const user = userEvent.setup()
     renderWithProviders(<FilterPanel />)
-    const checkbox = screen.getByLabelText('動画のみ')
-    expect(checkbox).toBeChecked()
-    await user.click(checkbox)
-    expect(checkbox).not.toBeChecked()
+    const cloudButton = screen.getByRole('button', { name: '動画のみ表示中' })
+    await user.click(cloudButton)
+    expect(screen.getByRole('button', { name: '全て表示中' })).toBeInTheDocument()
+  })
+
+  it('renders star filter buttons', () => {
+    renderWithProviders(<FilterPanel />)
+    const starFilter = screen.getByRole('group', { name: '星フィルタ' })
+    expect(starFilter).toBeInTheDocument()
+    const buttons = screen.getAllByRole('button', { name: /★\dフィルタ/ })
+    expect(buttons).toHaveLength(5)
+  })
+
+  it('star filter buttons are unpressed by default', () => {
+    renderWithProviders(<FilterPanel />)
+    const buttons = screen.getAllByRole('button', { name: /★\dフィルタ/ })
+    buttons.forEach((button) => {
+      expect(button).toHaveAttribute('aria-pressed', 'false')
+    })
   })
 })

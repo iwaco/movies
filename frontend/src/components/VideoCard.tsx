@@ -1,6 +1,6 @@
 import { Link, useSearchParams } from 'react-router'
 import type { Video } from '../types/video'
-import { FavoriteButton } from './FavoriteButton'
+import { StarRating } from './StarRating'
 
 interface VideoCardProps {
   video: Video
@@ -43,7 +43,7 @@ export function VideoCard({ video }: VideoCardProps) {
           <Link to={`/videos/${video.id}`} className="font-semibold text-gray-900 dark:text-gray-100 hover:underline">
             {video.title}
           </Link>
-          <FavoriteButton videoId={video.id} isFavorite={video.is_favorite} />
+          <StarRating videoId={video.id} rating={video.rating} />
         </div>
         <div className="text-sm mt-1 flex flex-wrap gap-1">
           {video.actors.map((a) => {

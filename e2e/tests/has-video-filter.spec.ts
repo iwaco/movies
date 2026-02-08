@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { SELECTORS } from '../helpers/selectors';
-import { VIDEO_1, VIDEO_2, VIDEO_3, TOTAL_VIDEOS, TOTAL_VIDEOS_WITH_FORMAT } from '../helpers/test-data';
+import { TOTAL_VIDEOS, TOTAL_VIDEOS_WITH_FORMAT, VIDEO_1, VIDEO_2, VIDEO_3 } from '../helpers/test-data';
 
 /** カード数をカウントするセレクタ（各カードに img が1つ） */
 const cardImg = '.grid a[href^="/videos/"] img';
@@ -11,8 +11,8 @@ test.describe('HV: 動画フォーマットフィルタ', () => {
     await page.waitForSelector(SELECTORS.searchInput);
   });
 
-  test('HV-1: デフォルトで「動画のみ」チェックボックスがON', async ({ page }) => {
-    await expect(page.locator(SELECTORS.hasVideoFilter)).toBeChecked();
+  test('HV-1: デフォルトでクラウドアイコンがOFF状態（動画のみ表示中）', async ({ page }) => {
+    await expect(page.locator('button[aria-label="動画のみ表示中"]')).toBeVisible();
   });
 
   test('HV-2: デフォルトでフォーマット付き動画のみ表示される', async ({ page }) => {
@@ -22,37 +22,37 @@ test.describe('HV: 動画フォーマットフィルタ', () => {
     await expect(page.locator(`a[href="/videos/${VIDEO_3.id}"]`).first()).not.toBeVisible();
   });
 
-  test('HV-3: チェックボックスをOFFにすると全動画が表示される', async ({ page }) => {
-    await page.getByLabel('動画のみ').click();
-    await expect(page.locator(SELECTORS.hasVideoFilter)).not.toBeChecked();
+  test('HV-3: クラウドアイコンをクリックするとONになり全動画が表示される', async ({ page }) => {
+    await page.locator('button[aria-label="動画のみ表示中"]').click();
+    await expect(page.locator('button[aria-label="全て表示中"]')).toBeVisible();
     await expect(page.locator(cardImg)).toHaveCount(TOTAL_VIDEOS);
     await expect(page.locator(`a[href="/videos/${VIDEO_3.id}"]`).first()).toBeVisible();
   });
 
-  test('HV-4: チェックボックスをOFF→ONで元に戻る', async ({ page }) => {
-    await page.getByLabel('動画のみ').click();
+  test('HV-4: 再度クリックでOFFに戻り動画のみ表示', async ({ page }) => {
+    await page.locator('button[aria-label="動画のみ表示中"]').click();
     await expect(page.locator(cardImg)).toHaveCount(TOTAL_VIDEOS);
 
-    await page.getByLabel('動画のみ').click();
+    await page.locator('button[aria-label="全て表示中"]').click();
     await expect(page.locator(cardImg)).toHaveCount(TOTAL_VIDEOS_WITH_FORMAT);
     await expect(page.locator(`a[href="/videos/${VIDEO_3.id}"]`).first()).not.toBeVisible();
   });
 
-  test('HV-5: フィルタOFF時にURLにhas_video=falseが反映される', async ({ page }) => {
-    await page.getByLabel('動画のみ').click();
-    await expect(page.locator(SELECTORS.hasVideoFilter)).not.toBeChecked();
+  test('HV-5: ON時にURLに has_video=false が反映される', async ({ page }) => {
+    await page.locator('button[aria-label="動画のみ表示中"]').click();
+    await expect(page.locator('button[aria-label="全て表示中"]')).toBeVisible();
     await expect(page).toHaveURL(/has_video=false/);
   });
 
-  test('HV-6: フィルタON時にURLにhas_videoパラメータがない', async ({ page }) => {
+  test('HV-6: OFF時にURLに has_video パラメータがない', async ({ page }) => {
     const url = new URL(page.url());
     expect(url.searchParams.has('has_video')).toBeFalsy();
   });
 
-  test('HV-7: has_video=falseのURLから状態が復元される', async ({ page }) => {
+  test('HV-7: has_video=false のURLから状態が復元される', async ({ page }) => {
     await page.goto('/?has_video=false');
     await page.waitForSelector(SELECTORS.searchInput);
-    await expect(page.locator(SELECTORS.hasVideoFilter)).not.toBeChecked();
+    await expect(page.locator('button[aria-label="全て表示中"]')).toBeVisible();
     await expect(page.locator(cardImg)).toHaveCount(TOTAL_VIDEOS);
   });
 
@@ -79,7 +79,7 @@ test.describe('HV: 動画フォーマットフィルタ', () => {
 
     await page.goto('/?page=2');
     await page.waitForSelector(SELECTORS.searchInput);
-    await page.getByLabel('動画のみ').click();
+    await page.locator('button[aria-label="動画のみ表示中"]').click();
     const url = new URL(page.url());
     const pageParam = url.searchParams.get('page');
     expect(pageParam === null || pageParam === '1').toBeTruthy();

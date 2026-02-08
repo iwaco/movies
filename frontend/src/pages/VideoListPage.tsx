@@ -13,10 +13,11 @@ export function VideoListPage() {
   const tags = searchParams.getAll('tag')
   const actors = searchParams.getAll('actor')
   const hasVideo = searchParams.get('has_video') !== 'false'
+  const minRating = Number(searchParams.get('min_rating') || '0')
 
   const { data } = useQuery({
-    queryKey: ['videos', page, q, tags, actors, hasVideo],
-    queryFn: () => fetchVideos({ page, q, tags, actors, has_video: hasVideo }),
+    queryKey: ['videos', page, q, tags, actors, hasVideo, minRating],
+    queryFn: () => fetchVideos({ page, q, tags, actors, has_video: hasVideo, min_rating: minRating || undefined }),
   })
 
   const videos = data?.data ?? []

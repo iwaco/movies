@@ -12,7 +12,7 @@ type Video struct {
 	Actors      []Actor       `json:"actors"`
 	Tags        []Tag         `json:"tags"`
 	Formats     []VideoFormat `json:"formats"`
-	IsFavorite  bool          `json:"is_favorite"`
+	Rating      int           `json:"rating"`
 	CreatedAt   time.Time     `json:"created_at"`
 	UpdatedAt   time.Time     `json:"updated_at"`
 }
@@ -42,8 +42,8 @@ type VideoQueryParams struct {
 	DateFrom string
 	DateTo   string
 	Sort     string
-	Favorite bool
-	HasVideo bool
+	MinRating int
+	HasVideo  bool
 }
 
 type VideoListResult struct {

@@ -15,7 +15,7 @@ const mockVideo: Video = {
   actors: [{ id: 1, name: 'Actor A' }],
   tags: [{ id: 1, name: 'Tag1' }, { id: 2, name: 'Tag2' }],
   formats: [{ id: 1, name: '720p', file_path: '/videos/video1/720p.mp4' }],
-  is_favorite: false,
+  rating: 0,
   created_at: '2024-01-15T00:00:00Z',
   updated_at: '2024-01-15T00:00:00Z',
 }
@@ -94,8 +94,8 @@ describe('VideoCard', () => {
     expect(links.some((link) => link.getAttribute('href') === '/videos/video-1')).toBe(true)
   })
 
-  it('contains FavoriteButton', () => {
+  it('contains StarRating', () => {
     renderWithProviders(<VideoCard video={mockVideo} />)
-    expect(screen.getByRole('button', { name: /お気に入り/ })).toBeInTheDocument()
+    expect(screen.getByRole('group', { name: '評価' })).toBeInTheDocument()
   })
 })

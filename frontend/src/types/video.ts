@@ -8,7 +8,7 @@ export interface Video {
   actors: Actor[];
   tags: Tag[];
   formats: VideoFormat[];
-  is_favorite: boolean;
+  rating: number;
   created_at: string;
   updated_at: string;
 }

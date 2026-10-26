@@ -15,7 +15,7 @@ COPY . .
 RUN CGO_ENABLED=0 go build -o server ./cmd/server
 
 # Stage 3: Runtime
-FROM gcr.io/distroless/static-debian12:nonroot
+FROM gcr.io/distroless/static-debian13:nonroot
 WORKDIR /app
 COPY --from=backend-build /build/server /app/server
 COPY --from=frontend-build /build/dist/ /app/frontend/dist/

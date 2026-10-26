@@ -11,5 +11,43 @@
     "dependencyDashboard": true,
     "postUpdateOptions": [
         "gomodTidy"
+    ],
+    "packageRules": [
+        {
+            "description": "npm の minor・patch を frontend と e2e をまたいで 1 つの PR にまとめる。config:recommended の monorepo のグループより後に置いて上書きする。major は対象外で、既定どおり個別の PR にする",
+            "matchManagers": [
+                "npm"
+            ],
+            "matchUpdateTypes": [
+                "minor",
+                "patch"
+            ],
+            "groupName": "npm non-major"
+        },
+        {
+            "description": "Go modules の minor・patch を 1 つの PR にまとめる。go.mod の go の行（depType golang）もここに入る。major は対象外",
+            "matchManagers": [
+                "gomod"
+            ],
+            "matchUpdateTypes": [
+                "minor",
+                "patch"
+            ],
+            "groupName": "go modules non-major"
+        },
+        {
+            "description": "Dockerfile の golang イメージを Go modules と同じ PR に入れ、go.mod の go の行とビルドに使う Go の版がずれないようにする",
+            "matchManagers": [
+                "dockerfile"
+            ],
+            "matchDepNames": [
+                "golang"
+            ],
+            "matchUpdateTypes": [
+                "minor",
+                "patch"
+            ],
+            "groupName": "go modules non-major"
+        }
     ]
 }

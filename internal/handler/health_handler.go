@@ -14,25 +14,21 @@ func NewHealthHandler(db *sql.DB) *HealthHandler {
 }
 
 func (h *HealthHandler) Healthz(w http.ResponseWriter, r *http.Request) {
-	if err := h.db.QueryRow("SELECT 1").Err(); err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusServiceUnavailable)
-		w.Write([]byte(`{"status":"error"}`))
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"status":"ok"}`))
+	h.checkDB(w, r)
 }
 
 func (h *HealthHandler) Readyz(w http.ResponseWriter, r *http.Request) {
-	if err := h.db.QueryRow("SELECT 1").Err(); err != nil {
-		w.Header().Set("Content-Type", "application/json")
+	h.checkDB(w, r)
+}
+
+// checkDB uses PingContext so the connection is returned to the pool after each probe.
+func (h *HealthHandler) checkDB(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	if err := h.db.PingContext(r.Context()); err != nil {
 		w.WriteHeader(http.StatusServiceUnavailable)
 		w.Write([]byte(`{"status":"error"}`))
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"status":"ok"}`))
 }

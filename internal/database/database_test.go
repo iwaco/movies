@@ -1,6 +1,11 @@
 package database
 
 import (
+	"context"
+	"database/sql"
+	"fmt"
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -88,5 +93,71 @@ func TestForeignKeysEnabled(t *testing.T) {
 	}
 	if fk != 1 {
 		t.Errorf("expected foreign_keys to be enabled (1), got %d", fk)
+	}
+}
+
+func TestWithForeignKeys(t *testing.T) {
+	tests := []struct {
+		dsn  string
+		want string
+	}{
+		{"movies.db", "movies.db?_pragma=foreign_keys(1)"},
+		{"/data/movies.db", "/data/movies.db?_pragma=foreign_keys(1)"},
+		{":memory:", ":memory:?_pragma=foreign_keys(1)"},
+		{"movies.db?_pragma=busy_timeout(5000)", "movies.db?_pragma=busy_timeout(5000)&_pragma=foreign_keys(1)"},
+		{"file:movies.db?mode=rwc", "file:movies.db?mode=rwc&_pragma=foreign_keys(1)"},
+		{"file:movies.db", "file:movies.db?_pragma=foreign_keys(1)"},
+	}
+	for _, tt := range tests {
+		if got := withForeignKeys(tt.dsn); got != tt.want {
+			t.Errorf("withForeignKeys(%q) = %q, want %q", tt.dsn, got, tt.want)
+		}
+	}
+}
+
+// foreign_keys is a per-connection setting, so it must be enabled on every
+// connection the pool opens, not just the first one.
+func TestForeignKeysEnabledOnAllConnections(t *testing.T) {
+	dir := t.TempDir()
+	dsns := map[string]string{
+		"path":     filepath.Join(dir, "path.db"),
+		"query":    filepath.Join(dir, "query.db") + "?_pragma=busy_timeout(5000)",
+		"file URI": "file:" + filepath.Join(dir, "uri.db") + "?mode=rwc",
+	}
+	for name, dsn := range dsns {
+		t.Run(name, func(t *testing.T) {
+			db, err := New(dsn)
+			if err != nil {
+				t.Fatalf("failed to create database: %v", err)
+			}
+			defer db.Close()
+			db.SetMaxOpenConns(3)
+
+			ctx := context.Background()
+			var conns []*sql.Conn
+			for i := 0; i < 3; i++ {
+				conn, err := db.Conn(ctx)
+				if err != nil {
+					t.Fatalf("failed to get connection %d: %v", i, err)
+				}
+				defer conn.Close()
+				conns = append(conns, conn)
+			}
+
+			for i, conn := range conns {
+				var fk int
+				if err := conn.QueryRowContext(ctx, "PRAGMA foreign_keys").Scan(&fk); err != nil {
+					t.Fatalf("conn %d: failed to check foreign_keys pragma: %v", i, err)
+				}
+				if fk != 1 {
+					t.Errorf("conn %d: expected foreign_keys to be enabled (1), got %d", i, fk)
+				}
+
+				_, err := conn.ExecContext(ctx, "INSERT INTO ratings (video_id, rating) VALUES ($1, 3)", fmt.Sprintf("missing%d", i))
+				if err == nil || !strings.Contains(err.Error(), "FOREIGN KEY") {
+					t.Errorf("conn %d: expected foreign key violation inserting rating for missing video, got %v", i, err)
+				}
+			}
+		})
 	}
 }
